@@ -6,18 +6,41 @@ using System;
 
 public class PleiadesClient : MonoBehaviour
 {
-    public string ipAdress = "127.0.0.1";
-    public int port = 6060;
+	public string ipAddress
+	{
+		get => _ipAddress;
+		set { _ipAddress = value;
+			if (websocket != null)
+			{
+				websocket.Close();
+				websocket = null;
+			}
+		}
+	}
+
+	public int port
+	{
+		get => _port;
+        set {
+	        _port = value;
+	        if (websocket != null) {
+		        websocket.Close();
+		        websocket = null;
+	        }
+        }
+	}
 
     WebSocket websocket;
 
     Dictionary<int, PObject> objects;
     public GameObject objectPrefab;
 
-
     float lastConnectTime;
 
-    async void Start()
+    string _ipAddress = "127.0.0.1";
+    int _port = 6060;
+
+async void Start()
     {
         init();
         connect();
@@ -27,7 +50,7 @@ public class PleiadesClient : MonoBehaviour
     {
         objects = new Dictionary<int, PObject>();
 
-        websocket = new WebSocket("ws://" + ipAdress + ":" + port);
+        websocket = new WebSocket("ws://" + ipAddress + ":" + port);
         websocket.OnOpen += () =>
         {
             Debug.Log("Connection open!");
