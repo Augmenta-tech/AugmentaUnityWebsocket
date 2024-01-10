@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using NativeWebSocket;
 using System;
+using UnityEngine.Events;
 
 public class PleiadesClient : MonoBehaviour
 {
@@ -34,6 +35,8 @@ public class PleiadesClient : MonoBehaviour
 
     Dictionary<int, PObject> objects;
     public GameObject objectPrefab;
+
+    public UnityEvent<PObject> OnPObjectCreated;
 
     float lastConnectTime;
 
@@ -159,6 +162,8 @@ async void Start()
             o.onRemove += onObjectRemove;
             objects.Add(objectID, o);
             o.transform.parent = transform;
+
+            OnPObjectCreated?.Invoke(o);
         }
 
         o.updateData(data, offset);

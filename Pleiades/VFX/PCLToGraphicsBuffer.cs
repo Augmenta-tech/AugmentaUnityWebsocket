@@ -6,22 +6,19 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.VFX;
 
-[RequireComponent(typeof(PObject))]
-public class PCLVFXBufferConverter : MonoBehaviour  
+public class PCLToGraphicsBuffer : MonoBehaviour  
 {
+	public PObject pObject;
 	public VisualEffect[] vfxToBind;
 
 	[Tooltip("Unlimited if <= 0")]public int capacity = 0;
 
-	PObject pObject;
+
 	GraphicsBuffer pointsBuffer;
 
 	void Start()
     {
-		//Get PObject
-	    pObject = GetComponent<PObject>();
-
-		//Bind vfx
+	    //Bind vfx
 	    if (vfxToBind.Length == 0)
 	    {
 		    vfxToBind = GetComponentsInChildren<VisualEffect>();
@@ -44,12 +41,19 @@ public class PCLVFXBufferConverter : MonoBehaviour
 	    if (capacity > 0)
 	    {
 		    CreateAndBindPositionsBuffer(capacity);
+			BindBufferCount(0);
 	    }
     }
 
 	void Update()
-    {
-	    int bufferCount = pObject.points.Length;
+	{
+		if (!pObject)
+		{
+			BindBufferCount(0);
+			return;
+		}
+
+		int bufferCount = pObject.points.Length;
 
 		if (capacity > 0)
 	    {
@@ -113,5 +117,10 @@ public class PCLVFXBufferConverter : MonoBehaviour
 	    foreach (var vfx in vfxToBind) {
 		    vfx.SetInt("PositionsCount", bufferCount);
 	    }
-}
+	}
+
+    public void BindPObject(PObject pObjectToBind)
+    {
+	    pObject = pObjectToBind;
+    }
 }
