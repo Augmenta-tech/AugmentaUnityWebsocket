@@ -31,11 +31,7 @@ public class PleiadesClient : MonoBehaviour
         }
 	}
 
-	public bool isConnected = false;
-	public bool receivingData = false;
-	public float lastMessageTime;
-
-	WebSocket websocket;
+    WebSocket websocket;
 
     Dictionary<int, PObject> objects;
     public GameObject objectPrefab;
@@ -44,8 +40,8 @@ public class PleiadesClient : MonoBehaviour
 
     float lastConnectTime;
 
-    string _ipAddress = "127.0.0.1";
-    int _port = 6060;
+	[SerializeField] string _ipAddress = "127.0.0.1";
+    [SerializeField] int _port = 6060;
 
 async void Start()
     {
@@ -60,8 +56,7 @@ async void Start()
         websocket = new WebSocket("ws://" + ipAddress + ":" + port);
         websocket.OnOpen += () =>
         {
-            Debug.Log("Connection open!");
-            isConnected = true;
+            Debug.Log("Connection "+ "ws://" + ipAddress + ":" + port + " opened !");
         };
 
         websocket.OnError += (e) =>
@@ -71,14 +66,12 @@ async void Start()
 
         websocket.OnClose += (e) =>
         {
-            Debug.Log("Connection closed!");
-            isConnected = false;
+            Debug.Log("Connection "+ "ws://" + ipAddress + ":" + port + " closed.");
         };
 
         websocket.OnMessage += (bytes) =>
         {
             processData(bytes);
-            lastMessageTime = Time.time;
         };
     }
 
@@ -113,9 +106,6 @@ async void Start()
             Destroy(objects[oid].gameObject);
             objects.Remove(oid);
         }
-
-        //Display
-        receivingData = (Time.time - lastMessageTime) < 2;
     }
 
 
