@@ -38,12 +38,16 @@ public class PleiadesClient : MonoBehaviour
 
     public UnityEvent<PObject> OnPObjectCreated;
 
-    float lastConnectTime;
+	public bool connected = false;
+    public bool receivingData = false;
 
-	[SerializeField] string _ipAddress = "127.0.0.1";
+    [SerializeField] string _ipAddress = "127.0.0.1";
     [SerializeField] int _port = 6060;
 
-async void Start()
+    float lastConnectTime;
+    float lastMessageTime;
+
+	async void Start()
     {
         init();
         connect();
@@ -56,7 +60,8 @@ async void Start()
         websocket = new WebSocket("ws://" + ipAddress + ":" + port);
         websocket.OnOpen += () =>
         {
-            Debug.Log("Connection "+ "ws://" + ipAddress + ":" + port + " opened !");
+	        connected = true;
+			Debug.Log("Connection "+ "ws://" + ipAddress + ":" + port + " opened !");
         };
 
         websocket.OnError += (e) =>
@@ -66,12 +71,14 @@ async void Start()
 
         websocket.OnClose += (e) =>
         {
-            Debug.Log("Connection "+ "ws://" + ipAddress + ":" + port + " closed.");
+	        connected = false;
+			Debug.Log("Connection "+ "ws://" + ipAddress + ":" + port + " closed.");
         };
 
         websocket.OnMessage += (bytes) =>
         {
-            processData(bytes);
+	        lastMessageTime = Time.time;
+			processData(bytes);
         };
     }
 
@@ -106,6 +113,8 @@ async void Start()
             Destroy(objects[oid].gameObject);
             objects.Remove(oid);
         }
+
+        receivingData = (Time.time - lastMessageTime) < 1;
     }
 
 
