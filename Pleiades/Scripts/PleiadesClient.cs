@@ -31,6 +31,10 @@ public class PleiadesClient : MonoBehaviour
         }
 	}
 
+	public bool mirrorX = false;
+	public bool mirrorY = false;
+	public bool mirrorZ = false;
+
     WebSocket websocket;
 
     Dictionary<int, PObject> objects;
@@ -172,6 +176,9 @@ public class PleiadesClient : MonoBehaviour
             o.onRemove += onObjectRemove;
             objects.Add(objectID, o);
             o.transform.parent = transform;
+            o.mirrorX = mirrorX;
+            o.mirrorY = mirrorY;
+            o.mirrorZ = mirrorZ;
 
             OnPObjectCreated?.Invoke(o);
         }

@@ -5,7 +5,7 @@ using System;
 
 public class PObject : MonoBehaviour
 {
-    public int objectID;
+	public int objectID;
     public Vector3[] points;
 
     //cluster
@@ -32,7 +32,11 @@ public class PObject : MonoBehaviour
     public enum CoordMode { Absolute, Relative }
     public CoordMode pointMode = CoordMode.Relative;
 
-    public delegate void OnRemoveEvent(PObject obj);
+    public bool mirrorX = false;
+    public bool mirrorY = false;
+    public bool mirrorZ = false;
+
+	public delegate void OnRemoveEvent(PObject obj);
     public event OnRemoveEvent onRemove;
 
     void Start()
@@ -87,6 +91,10 @@ public class PObject : MonoBehaviour
             Vector3 p = new Vector3(BitConverter.ToSingle(data, si), BitConverter.ToSingle(data, si + 4), BitConverter.ToSingle(data, si + 8));
             if (pointMode == CoordMode.Absolute) points[i] = p;
             else points[i] = transform.parent.TransformPoint(p);
+
+            if(mirrorX){ points[i].x *= -1; }
+            if(mirrorY){ points[i].y *= -1; }
+            if(mirrorZ){ points[i].z *= -1; }
         }
     }
 
@@ -107,7 +115,11 @@ public class PObject : MonoBehaviour
             Vector3 p = new Vector3(BitConverter.ToSingle(data, si), BitConverter.ToSingle(data, si + 4), BitConverter.ToSingle(data, si + 8));
             if (pointMode == CoordMode.Absolute) clusterData[i] = transform.parent.InverseTransformPoint(p);
             else clusterData[i] = p;
-        }
+
+            if (mirrorX) { clusterData[i].x *= -1; }
+            if (mirrorY) { clusterData[i].y *= -1; }
+            if (mirrorZ) { clusterData[i].z *= -1; }
+		}
 
         centroid = clusterData[0];
         velocity = clusterData[1];

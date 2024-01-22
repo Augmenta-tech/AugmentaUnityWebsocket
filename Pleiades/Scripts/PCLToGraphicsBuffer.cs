@@ -12,7 +12,9 @@ public class PCLToGraphicsBuffer : MonoBehaviour
 	GraphicsBuffer pointsBuffer;
 
 	void Start()
-    {
+	{
+		if (!pObject) pObject = GetComponent<PObject>();
+
 	    //Bind vfx
 	    if (vfxToBind.Length == 0)
 	    {
