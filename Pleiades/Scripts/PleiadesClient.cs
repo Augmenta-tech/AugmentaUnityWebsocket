@@ -77,7 +77,8 @@ public class PleiadesClient : MonoBehaviour
 
         websocket.OnMessage += (bytes) =>
         {
-	        lastMessageTime = Time.time;
+	        connected = true;
+			lastMessageTime = Time.time;
 			processData(bytes);
         };
     }
