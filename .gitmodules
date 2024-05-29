@@ -1,0 +1,3 @@
+[submodule "Runtime/Augmenta-Websocket-CS"]
+	path = Runtime/Augmenta-Websocket-CS
+	url = https://github.com/Augmenta-tech/Augmenta-Websocket-CS
