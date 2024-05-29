@@ -1,0 +1,19 @@
+#pragma kernel Convert
+
+uint2 MapDimensions;
+StructuredBuffer<float> PositionBuffer;
+RWTexture2D<float4> PositionMap;
+
+
+[numthreads(64, 1, 1)]
+void Convert(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x + id.y * MapDimensions.x;
+
+    PositionMap[id.xy] = float4(
+         PositionBuffer[i * 3],
+         PositionBuffer[i * 3 + 1],
+         PositionBuffer[i * 3 + 2],
+         1
+    );
+}

@@ -58,7 +58,7 @@ namespace Augmenta
         }
     }
 
-    public class AugmentaObject : MonoBehaviour
+    public class AugmentaObject : MonoBehaviour 
     {
 
         AugmentaPObject nativeObject;

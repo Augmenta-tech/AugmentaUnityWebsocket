@@ -85,6 +85,10 @@ namespace Augmenta
         public UnityEvent<AugmentaObject> OnObjectRemoved;
 
 
+        private void Awake()
+        {
+            pClient = new AugmentaPleiadesClient(this);
+        }
 
         void Start()
         {
