@@ -83,6 +83,8 @@ namespace Augmenta
         {
             wsMessages = new List<MessageEventArgs>();
             pClient = new AugmentaPleiadesClient(this);
+            tags = new List<string>();
+            _lastTags = new List<string>();
         }
 
          
@@ -213,7 +215,7 @@ namespace Augmenta
                         {
                             tagsChanged = true;
                             break;
-                        }
+                        } 
                     }
                 }
                 if(streamClouds != _lastStreamClouds || streamClusters != _lastStreamClusters || downSample != _lastDownSample || tagsChanged)

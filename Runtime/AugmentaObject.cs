@@ -17,7 +17,7 @@ namespace Augmenta
             this.aObject.setNativeObject(this);
         }
 
-        override protected void updatePosition()
+        override protected void updateTransform()
         {
             switch (posUpdateMode)
             {
@@ -30,6 +30,13 @@ namespace Augmenta
                     aObject.transform.localPosition = (minBounds + maxBounds) / 2;
                     break;
             }
+
+
+            Quaternion rot = Quaternion.AngleAxis(rotation.x, Vector3.right) *
+   Quaternion.AngleAxis(rotation.z, Vector3.forward) *
+   Quaternion.AngleAxis(rotation.y, Vector3.up);
+
+            aObject.transform.localRotation = rot;
         }
 
         override protected Vector3 ReadVector(ReadOnlySpan<byte> data, int offset)
@@ -92,11 +99,13 @@ namespace Augmenta
         // Update is called once per frame
         void Update()
         {
+            if (nativeObject == null) return;
             nativeObject.update(Time.time);
-        }
+        } 
 
         public void updateData(byte[] data, int offset)
         {
+            if(nativeObject == null) return;
             nativeObject.updateData(Time.time, data, offset);
         }
 
@@ -131,11 +140,15 @@ namespace Augmenta
 
                 Gizmos.color = c + Color.white * .3f;
 
-                Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.parent.position, transform.parent.rotation, transform.parent.lossyScale);
+                Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.parent.position + centroid, transform.rotation, transform.parent.lossyScale);
                 Gizmos.matrix = rotationMatrix;
 
-                Gizmos.DrawWireSphere(centroid, .03f);
-                Gizmos.DrawWireCube((minBounds + maxBounds) / 2, maxBounds - minBounds);
+                Gizmos.DrawWireSphere(Vector3.zero, .03f);
+
+                Vector3 boxCenter = (minBounds + maxBounds) / 2;
+                rotationMatrix = Matrix4x4.TRS(transform.parent.position + boxCenter, transform.rotation, transform.parent.lossyScale);
+                Gizmos.matrix = rotationMatrix;
+                Gizmos.DrawWireCube(Vector3.zero, maxBounds - minBounds);
             }
         }
     }
