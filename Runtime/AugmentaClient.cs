@@ -7,30 +7,6 @@ using WebSocketSharp;
 
 namespace Augmenta
 {
-    public class AugmentaPleiadesClient : GenericPleiadesClient
-    {
-        AugmentaClient client;
-
-        public AugmentaPleiadesClient(AugmentaClient client)
-        {
-            this.client = client;
-        }
-
-        override protected BasePObject createObject()
-        {
-            AugmentaObject ao = GameObject.Instantiate(client.objectPrefab).GetComponent<AugmentaObject>();
-            ao.transform.parent = client.transform;
-            return new AugmentaPObject(ao);
-        }
-
-        override protected BasePZone createZone()
-        {
-            AugmentaZone az = GameObject.Instantiate(client.zonePrefab).AddComponent<AugmentaZone>();
-            az.transform.parent = client.transform;
-            return new AugmentaPZone(az);
-        }
-    }
-
     public class AugmentaClient : MonoBehaviour
     {
         public string ipAddress
@@ -64,6 +40,7 @@ namespace Augmenta
         WebSocket websocket;
         AugmentaPleiadesClient pClient;
 
+        float lastUpdateTime;
         float lastConnectTime;
         float lastMessageTime;
 
@@ -85,8 +62,28 @@ namespace Augmenta
         public UnityEvent<AugmentaObject> OnObjectRemoved;
 
 
+        bool isProcessing;
+        List<MessageEventArgs> wsMessages;
+
+
         private void Awake()
         {
+            wsMessages = new List<MessageEventArgs>();
+            pClient = new AugmentaPleiadesClient(this);
+        }
+
+         
+        void OnDisable()
+        {
+            websocket.Close();
+            pClient.clear();
+            pClient = null;
+            wsMessages.Clear();
+        }
+
+        private void OnEnable()
+        {
+            wsMessages = new List<MessageEventArgs>();
             pClient = new AugmentaPleiadesClient(this);
         }
 
@@ -107,7 +104,7 @@ namespace Augmenta
 
             websocket.OnError += (sender, e) =>
             {
-                Debug.Log("Error! " + e);
+                Debug.Log("Error! " + e.Message);
             };
 
             websocket.OnClose += (sender, e) =>
@@ -118,18 +115,36 @@ namespace Augmenta
 
             websocket.OnMessage += (sender, e) =>
             {
+                Debug.Log("Receive message : " + e.IsText);
                 connected = true;
-                lastMessageTime = Time.time;
+                lastMessageTime = lastUpdateTime;
 
+                while (isProcessing) { }
+
+                wsMessages.Add(e);
+
+            };
+
+        }
+
+        void processMessage(MessageEventArgs e)
+        {
+            try
+            {
                 if (e.IsText)
                 {
-
+                    //pClient.processMessage(Time.time, e.RawData);
                 }
                 else if (e.IsBinary)
                 {
                     pClient.processData(Time.time, e.RawData);
+
                 }
-            };
+            }
+            catch (Exception err)
+            {
+                Debug.LogError("Error processing message : " + err);
+            }
         }
 
 
@@ -148,16 +163,22 @@ namespace Augmenta
             if (websocket == null) init();
 
 #if !UNITY_WEBGL || UNITY_EDITOR
-            if (!websocket.IsAlive && Time.time - lastConnectTime > 1)
+            if ((!connected || !websocket.IsAlive) && Time.time - lastConnectTime > 1)
             {
+                Debug.Log("Connecting websocket...");
                 connect();
             }
 
-            //websocket.DispatchMessageQueue();
 #endif
+            lastUpdateTime = Time.time;
+
+            isProcessing = true;
+            foreach (var e in wsMessages) processMessage(e);
+            wsMessages.Clear();
+            isProcessing = false;
+
 
             pClient.update(Time.time);
-
             receivingData = (Time.time - lastMessageTime) < 1;
         }
 
@@ -165,6 +186,44 @@ namespace Augmenta
         private void OnApplicationQuit()
         {
             websocket.Close();
+        }
+
+    }
+
+    public class AugmentaPleiadesClient : GenericPleiadesClient
+    {
+        AugmentaClient client;
+
+        public AugmentaPleiadesClient(AugmentaClient client)
+        {
+            this.client = client;
+        }
+
+        protected override BasePObject addObject(int objectID)
+        {
+            Debug.Log("Add Object : " + objectID);
+            return base.addObject(objectID);
+        }
+
+        protected override void removeObject(BasePObject o)
+        {
+            Debug.Log("Remove Object : " + o.objectID);
+            base.removeObject(o);
+        }
+
+
+        override protected BasePObject createObject()
+        {
+            AugmentaObject ao = GameObject.Instantiate(client.objectPrefab).GetComponent<AugmentaObject>();
+            ao.transform.parent = client.transform;
+            return new AugmentaPObject(ao);
+        }
+
+        override protected BasePZone createZone()
+        {
+            AugmentaZone az = GameObject.Instantiate(client.zonePrefab).AddComponent<AugmentaZone>();
+            az.transform.parent = client.transform;
+            return new AugmentaPZone(az);
         }
     }
 }

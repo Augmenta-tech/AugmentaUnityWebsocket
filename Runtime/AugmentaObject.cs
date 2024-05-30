@@ -7,13 +7,14 @@ using log4net.Util;
 
 namespace Augmenta
 {
-    public class AugmentaPObject : GenericPObject<Vector3>
+    public class AugmentaPObject : GenericPObject<Vector3> //this is Vector3 from UnityEngine, not System.Numerics (this is why we need to create a new class)
     {
         AugmentaObject aObject;
 
         public AugmentaPObject(AugmentaObject aObject)
         {
             this.aObject = aObject;
+            this.aObject.setNativeObject(this);
         }
 
         override protected void updatePosition()
@@ -23,10 +24,10 @@ namespace Augmenta
                 case PositionUpdateMode.None:
                     break;
                 case PositionUpdateMode.Centroid:
-                    aObject.transform.position = centroid;
+                    aObject.transform.localPosition = centroid;
                     break;
                 case PositionUpdateMode.BoxCenter:
-                    aObject.transform.position = (minBounds + maxBounds) / 2;
+                    aObject.transform.localPosition = (minBounds + maxBounds) / 2;
                     break;
             }
         }
@@ -48,21 +49,22 @@ namespace Augmenta
 
         protected override void updateClusterPoint(ref Vector3 pointInArray, Vector3 point)
         {
-            if (pointMode == CoordMode.Absolute) pointInArray = point;
-            else pointInArray = aObject.transform.parent.TransformPoint(point);
+            if (pointMode == CoordMode.Absolute) pointInArray = aObject.transform.parent.InverseTransformPoint(point);
+            else pointInArray = point;
+            //Debug.Log("update cluster point : " +pointInArray);
         }
 
-        public override void kill()
+        public override void kill(bool immediate = false)
         {
-            aObject.kill();
+            aObject.kill(immediate);
         }
     }
 
-    public class AugmentaObject : MonoBehaviour 
+    public class AugmentaObject : MonoBehaviour
     {
 
         AugmentaPObject nativeObject;
-
+         
         public int objectID { get { return nativeObject.objectID; } }
         public Vector3[] points { get { return nativeObject.points.ToArray(); } }
         public AugmentaPObject.State state { get { return nativeObject.state; } }
@@ -74,7 +76,7 @@ namespace Augmenta
 
         [Header("Behaviour")]
         public float killDelayTime = 0;
-
+         
         [Header("Debug")]
         public bool drawDebug;
 
@@ -82,9 +84,9 @@ namespace Augmenta
         public delegate void OnRemoveEvent(AugmentaObject obj);
         public event OnRemoveEvent onRemove;
 
-        void Start()
+        public void setNativeObject(AugmentaPObject nativeObject)
         {
-            nativeObject = new AugmentaPObject(this);
+            this.nativeObject = nativeObject;
         }
 
         // Update is called once per frame
@@ -98,10 +100,10 @@ namespace Augmenta
             nativeObject.updateData(Time.time, data, offset);
         }
 
-        public void kill()
+        public void kill(bool immediate)
         {
             onRemove?.Invoke(this);
-            if (killDelayTime == 0)
+            if (immediate || killDelayTime == 0)
             {
                 Destroy(gameObject);
                 return;
@@ -128,6 +130,10 @@ namespace Augmenta
                 foreach (var p in points) Gizmos.DrawLine(p, p + Vector3.forward * .01f);
 
                 Gizmos.color = c + Color.white * .3f;
+
+                Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.parent.position, transform.parent.rotation, transform.parent.lossyScale);
+                Gizmos.matrix = rotationMatrix;
+
                 Gizmos.DrawWireSphere(centroid, .03f);
                 Gizmos.DrawWireCube((minBounds + maxBounds) / 2, maxBounds - minBounds);
             }
