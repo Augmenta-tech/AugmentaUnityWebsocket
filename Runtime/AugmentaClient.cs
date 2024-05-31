@@ -4,10 +4,10 @@ using UnityEngine;
 using System;
 using UnityEngine.Events;
 using WebSocketSharp;
-using OSCQuery;
 
 namespace Augmenta
 {
+    using AugmentaPContainer = PContainer<Vector3>;
     public class AugmentaClient : MonoBehaviour
     {
         public string ipAddress
@@ -47,8 +47,9 @@ namespace Augmenta
 
 
         [Header("Spawn")]
-        public GameObject objectPrefab;
+        public GameObject scenePrefab;
         public GameObject zonePrefab;
+        public GameObject objectPrefab;
 
         [Header("Connection")]
         public string clientName = "Unity";
@@ -87,7 +88,7 @@ namespace Augmenta
             _lastTags = new List<string>();
         }
 
-         
+
         void OnDisable()
         {
             websocket.Close();
@@ -139,7 +140,6 @@ namespace Augmenta
                 wsMessages.Add(e);
 
             };
-
         }
 
 
@@ -153,7 +153,7 @@ namespace Augmenta
             options.AddField("streamClouds", streamClouds);
             options.AddField("streamClusters", streamClusters);
             JSONObject tagsO = JSONObject.Create();
-            foreach(var t in tags) tagsO.Add(t);
+            foreach (var t in tags) tagsO.Add(t);
             options.AddField("tags", tagsO);
             JSONObject coords = JSONObject.Create();
             coords.AddField("axis", "y_up_left");
@@ -173,7 +173,7 @@ namespace Augmenta
             {
                 if (e.IsText)
                 {
-                    //pClient.processMessage(Time.time, e.RawData);
+                    pClient.processMessage(e.Data);
                 }
                 else if (e.IsBinary)
                 {
@@ -191,9 +191,15 @@ namespace Augmenta
         void connect()
         {
             Debug.Log("Connecting websocket...");
+            StartCoroutine(connectCoroutine());
+        }
+
+        IEnumerator connectCoroutine()
+        {
             lastConnectTime = Time.time;
             websocket.Close();
             websocket.Connect();
+            yield return null;
         }
 
         // Update is called once per frame
@@ -203,7 +209,7 @@ namespace Augmenta
             if (websocket == null) init();
 
 
-            if(connected)
+            if (connected)
             {
                 bool tagsChanged = false;
                 if (tags.Count != _lastTags.Count) tagsChanged = true;
@@ -215,10 +221,10 @@ namespace Augmenta
                         {
                             tagsChanged = true;
                             break;
-                        } 
+                        }
                     }
                 }
-                if(streamClouds != _lastStreamClouds || streamClusters != _lastStreamClusters || downSample != _lastDownSample || tagsChanged)
+                if (streamClouds != _lastStreamClouds || streamClusters != _lastStreamClusters || downSample != _lastDownSample || tagsChanged)
                 {
                     sendRegister();
                     _lastStreamClouds = streamClouds;
@@ -231,7 +237,6 @@ namespace Augmenta
 #if !UNITY_WEBGL || UNITY_EDITOR
             if ((!connected || !websocket.IsAlive) && Time.time - lastConnectTime > 1)
             {
-                Debug.Log("Connecting websocket...");
                 connect();
             }
 
@@ -256,40 +261,43 @@ namespace Augmenta
 
     }
 
-    public class AugmentaPleiadesClient : GenericPleiadesClient
+    public class AugmentaPleiadesClient : PleiadesClient<AugmentaPObject, Vector3>
     {
-        AugmentaClient client;
+        public AugmentaClient client;
+        public AugmentaContainer aWorldContainer;
 
         public AugmentaPleiadesClient(AugmentaClient client)
         {
             this.client = client;
         }
 
-        protected override BasePObject addObject(int objectID)
-        {
-            Debug.Log("Add Object : " + objectID);
-            return base.addObject(objectID);
-        }
-
-        protected override void removeObject(BasePObject o)
-        {
-            Debug.Log("Remove Object : " + o.objectID);
-            base.removeObject(o);
-        }
-
 
         override protected BasePObject createObject()
         {
             AugmentaObject ao = GameObject.Instantiate(client.objectPrefab).GetComponent<AugmentaObject>();
-            ao.transform.parent = client.transform;
+            if (workingScene != null)
+                ao.transform.parent = (workingScene.wrapperObject as AugmentaScene).objectsContainer.transform;
+            else
+                ao.transform.parent = client.transform;
+
             return new AugmentaPObject(ao);
         }
 
-        override protected BasePZone createZone()
+        override protected AugmentaPContainer createContainerInternal(JSONObject o)
         {
-            AugmentaZone az = GameObject.Instantiate(client.zonePrefab).AddComponent<AugmentaZone>();
-            az.transform.parent = client.transform;
-            return new AugmentaPZone(az);
+            AugmentaPContainer p = base.createContainerInternal(o);
+            AugmentaContainer c = new GameObject().AddComponent<AugmentaContainer>();
+            c.setup(p, client);
+            c.transform.parent = client.transform;
+            aWorldContainer = c;
+            return p;
+        }
+
+        public override void clear()
+        {
+            base.clear();
+            if(aWorldContainer != null) GameObject.Destroy(aWorldContainer.gameObject);
+            aWorldContainer = null;
         }
     }
 }

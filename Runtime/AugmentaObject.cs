@@ -11,10 +11,11 @@ namespace Augmenta
     {
         AugmentaObject aObject;
 
-        public AugmentaPObject(AugmentaObject aObject)
+        public AugmentaPObject() { }
+        public AugmentaPObject(AugmentaObject ao = null)
         {
-            this.aObject = aObject;
-            this.aObject.setNativeObject(this);
+            aObject = ao;
+            aObject.setNativeObject(this);
         }
 
         override protected void updateTransform()
@@ -37,15 +38,6 @@ namespace Augmenta
    Quaternion.AngleAxis(rotation.y, Vector3.up);
 
             aObject.transform.localRotation = rot;
-        }
-
-        override protected Vector3 ReadVector(ReadOnlySpan<byte> data, int offset)
-        {
-            return MemoryMarshal.Cast<byte, Vector3>(data.Slice(offset))[0];
-        }
-        override protected ReadOnlySpan<Vector3> ReadVectors(ReadOnlySpan<byte> data, int offset, int length)
-        {
-            return MemoryMarshal.Cast<byte, Vector3>(data.Slice(offset, length));
         }
 
         protected override void updateCloudPoint(ref Vector3 pointInArray, Vector3 point)
@@ -71,7 +63,7 @@ namespace Augmenta
     {
 
         AugmentaPObject nativeObject;
-         
+
         public int objectID { get { return nativeObject.objectID; } }
         public Vector3[] points { get { return nativeObject.points.ToArray(); } }
         public AugmentaPObject.State state { get { return nativeObject.state; } }
@@ -83,7 +75,7 @@ namespace Augmenta
 
         [Header("Behaviour")]
         public float killDelayTime = 0;
-         
+
         [Header("Debug")]
         public bool drawDebug;
 
@@ -101,11 +93,11 @@ namespace Augmenta
         {
             if (nativeObject == null) return;
             nativeObject.update(Time.time);
-        } 
+        }
 
         public void updateData(byte[] data, int offset)
         {
-            if(nativeObject == null) return;
+            if (nativeObject == null) return;
             nativeObject.updateData(Time.time, data, offset);
         }
 
@@ -130,6 +122,7 @@ namespace Augmenta
 
         void OnDrawGizmos()
         {
+            if (nativeObject == null) return;
             if (drawDebug)
             {
                 Color c = Color.HSVToRGB((objectID * .1f) % 1, 1, 1); //Color.red;// getColor();

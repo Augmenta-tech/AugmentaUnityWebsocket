@@ -44,12 +44,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f54af2d74691b604bb55f4b33d35ac95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectPrefab: {fileID: 7658793332000198851, guid: 3d7a6e6df4de8d04aaa3c47b8c69f793, type: 3}
-  zonePrefab: {fileID: 0}
+  objectPrefab: {fileID: 7658793332000198851, guid: 3d7a6e6df4de8d04aaa3c47b8c69f793,
+    type: 3}
+  zonePrefab: {fileID: 557207557075932679, guid: deb64c48586925f43be714c0ec7fcd69,
+    type: 3}
+  clientName: Unity
+  clientID: 
   _ipAddress: 127.0.0.1
   _port: 6060
   connected: 0
   receivingData: 0
+  downSample: 1
+  streamClouds: 1
+  streamClusters: 1
+  tags: []
   OnObjectCreated:
     m_PersistentCalls:
       m_Calls: []

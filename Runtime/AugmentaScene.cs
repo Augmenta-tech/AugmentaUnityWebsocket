@@ -7,16 +7,23 @@ using System.Runtime.InteropServices;
 namespace Augmenta
 {
     using AugmentaPContainer = PContainer<Vector3>;
-    using AugmentaPZone = PZone<Vector3>;
-    public class AugmentaZone : AugmentaContainer
+    using AugmentaPScene = PScene<Vector3>;
+    public class AugmentaScene : AugmentaContainer
     {
 
-        AugmentaPZone nativeZone;
+        AugmentaPScene nativeScene;
+        public GameObject objectsContainer;
 
         public override void setup(AugmentaPContainer c, AugmentaClient client)
         {
             base.setup(c, client);
-            this.nativeZone = c as AugmentaPZone;
+            this.nativeScene = c as AugmentaPScene;
+
+            Debug.Log("SCENE SETUP : " + this.nativeScene);
+
+            objectsContainer = new GameObject("Objects");
+            objectsContainer.transform.parent = transform;
+
         }
 
         public override void Update()
@@ -26,9 +33,10 @@ namespace Augmenta
 
         private void OnDrawGizmos()
         {
+            if(nativeScene == null) return;
             Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
             Gizmos.color = Color.red;
-            //Gizmos.DrawWireCube(Vector3.zero, nativeZone.size);
+            Gizmos.DrawWireCube(Vector3.zero, nativeScene.size);
         }
     }
 }

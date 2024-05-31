@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-namespace OSCQuery
+namespace Augmenta
 {
 	public static partial class JSONTemplates
 	{

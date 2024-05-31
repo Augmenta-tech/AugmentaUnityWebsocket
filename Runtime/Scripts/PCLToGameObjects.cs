@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Augmenta
 {
 
-    [RequireComponent(typeof(PObject))]
+    [RequireComponent(typeof(AugmentaObject))]
     public class PCLToGameObjects : MonoBehaviour
     {
         public int objectsCount;
