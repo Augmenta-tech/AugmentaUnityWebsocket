@@ -19,8 +19,6 @@ namespace Augmenta
             base.setup(c, client);
             this.nativeScene = c as AugmentaPScene;
 
-            Debug.Log("SCENE SETUP : " + this.nativeScene);
-
             objectsContainer = new GameObject("Objects");
             objectsContainer.transform.parent = transform;
 
@@ -36,7 +34,7 @@ namespace Augmenta
             if(nativeScene == null) return;
             Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
             Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(Vector3.zero, nativeScene.size);
+            Gizmos.DrawWireCube(nativeScene.size / 2, nativeScene.size);
         }
     }
 }

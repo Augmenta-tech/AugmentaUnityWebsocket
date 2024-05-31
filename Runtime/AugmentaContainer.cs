@@ -51,8 +51,8 @@ namespace Augmenta
         public virtual void Update()
         {
             if (nativeObject == null) return;
-            transform.position = nativeObject.position;
-            transform.rotation = Quaternion.Euler(nativeObject.rotation);
+            transform.localPosition = nativeObject.position;
+            transform.localRotation = Quaternion.Euler(nativeObject.rotation);
         }
     }
 }

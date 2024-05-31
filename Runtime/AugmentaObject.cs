@@ -133,15 +133,13 @@ namespace Augmenta
 
                 Gizmos.color = c + Color.white * .3f;
 
-                Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.parent.position + centroid, transform.rotation, transform.parent.lossyScale);
+                Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.parent.position, transform.rotation, transform.parent.lossyScale);
                 Gizmos.matrix = rotationMatrix;
 
-                Gizmos.DrawWireSphere(Vector3.zero, .03f);
+                Gizmos.DrawWireSphere(centroid, .03f);
 
                 Vector3 boxCenter = (minBounds + maxBounds) / 2;
-                rotationMatrix = Matrix4x4.TRS(transform.parent.position + boxCenter, transform.rotation, transform.parent.lossyScale);
-                Gizmos.matrix = rotationMatrix;
-                Gizmos.DrawWireCube(Vector3.zero, maxBounds - minBounds);
+                Gizmos.DrawWireCube(boxCenter, maxBounds - minBounds);
             }
         }
     }

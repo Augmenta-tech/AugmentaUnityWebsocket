@@ -44,9 +44,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f54af2d74691b604bb55f4b33d35ac95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectPrefab: {fileID: 7658793332000198851, guid: 3d7a6e6df4de8d04aaa3c47b8c69f793,
+  scenePrefab: {fileID: 557207557075932679, guid: 0d8d366e5ddce5d43a2cc98e358f5632,
     type: 3}
   zonePrefab: {fileID: 557207557075932679, guid: deb64c48586925f43be714c0ec7fcd69,
+    type: 3}
+  objectPrefab: {fileID: 7658793332000198851, guid: 3d7a6e6df4de8d04aaa3c47b8c69f793,
     type: 3}
   clientName: Unity
   clientID: 
