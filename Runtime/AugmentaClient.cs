@@ -271,7 +271,8 @@ namespace Augmenta
             this.client = client;
         }
 
-
+        //The following overrides are necessary in Unity because we need to create MonoBehaviour objects aside the "native" PObject (can't inherit more than one class)
+        //In a regular C# project, you may not need to override these methods
         override protected BasePObject createObject()
         {
             AugmentaObject ao = GameObject.Instantiate(client.objectPrefab).GetComponent<AugmentaObject>();
