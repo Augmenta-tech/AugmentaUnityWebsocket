@@ -5,7 +5,7 @@
   "keywords": [
     "unity"
   ],
-  "license": "GPL v3",
+  "license": "MIT",
   "name": "tech.augmenta.augmentaunityclient",
   "repository": "Augmenta-tech/AugmentaUnityWebsocket",
   "unity": "2018.3",
