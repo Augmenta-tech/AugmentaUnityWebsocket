@@ -13,7 +13,7 @@ namespace Augmenta
 
         AugmentaPZone nativeZone;
 
-        public override void setup(AugmentaPContainer c, AugmentaClient client)
+        internal override void setup(AugmentaPContainer c, AugmentaClient client)
         {
             base.setup(c, client);
             this.nativeZone = c as AugmentaPZone;

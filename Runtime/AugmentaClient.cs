@@ -261,7 +261,7 @@ namespace Augmenta
 
     }
 
-    public class AugmentaPleiadesClient : PleiadesClient<AugmentaPObject, Vector3>
+    internal class AugmentaPleiadesClient : PleiadesClient<AugmentaPObject, Vector3>
     {
         public AugmentaClient client;
         public AugmentaContainer aWorldContainer;

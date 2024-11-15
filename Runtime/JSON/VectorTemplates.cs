@@ -24,19 +24,19 @@ THE SOFTWARE.
 
 namespace Augmenta
 {
-	public static partial class JSONTemplates
+	internal static partial class JSONTemplates
 	{
 
 		/*
 		 * Vector2
 		 */
-		public static Vector2 ToVector2(JSONObject obj)
+		internal static Vector2 ToVector2(JSONObject obj)
 		{
 			float x = obj["x"] ? obj["x"].f : 0;
 			float y = obj["y"] ? obj["y"].f : 0;
 			return new Vector2(x, y);
 		}
-		public static JSONObject FromVector2(Vector2 v)
+		internal static JSONObject FromVector2(Vector2 v)
 		{
 			JSONObject vdata = JSONObject.obj;
 			if (v.x != 0) vdata.AddField("x", v.x);
@@ -46,7 +46,7 @@ namespace Augmenta
 		/*
 		 * Vector3
 		 */
-		public static JSONObject FromVector3(Vector3 v)
+		internal static JSONObject FromVector3(Vector3 v)
 		{
 			JSONObject vdata = JSONObject.obj;
 			if (v.x != 0) vdata.AddField("x", v.x);
@@ -54,7 +54,7 @@ namespace Augmenta
 			if (v.z != 0) vdata.AddField("z", v.z);
 			return vdata;
 		}
-		public static Vector3 ToVector3(JSONObject obj)
+		internal static Vector3 ToVector3(JSONObject obj)
 		{
 			float x = obj["x"] ? obj["x"].f : 0;
 			float y = obj["y"] ? obj["y"].f : 0;
@@ -64,7 +64,7 @@ namespace Augmenta
 		/*
 		 * Vector4
 		 */
-		public static JSONObject FromVector4(Vector4 v)
+		internal static JSONObject FromVector4(Vector4 v)
 		{
 			JSONObject vdata = JSONObject.obj;
 			if (v.x != 0) vdata.AddField("x", v.x);
@@ -73,7 +73,7 @@ namespace Augmenta
 			if (v.w != 0) vdata.AddField("w", v.w);
 			return vdata;
 		}
-		public static Vector4 ToVector4(JSONObject obj)
+		internal static Vector4 ToVector4(JSONObject obj)
 		{
 			float x = obj["x"] ? obj["x"].f : 0;
 			float y = obj["y"] ? obj["y"].f : 0;
@@ -84,7 +84,7 @@ namespace Augmenta
 		/*
 		 * Matrix4x4
 		 */
-		public static JSONObject FromMatrix4x4(Matrix4x4 m)
+		internal static JSONObject FromMatrix4x4(Matrix4x4 m)
 		{
 			JSONObject mdata = JSONObject.obj;
 			if (m.m00 != 0) mdata.AddField("m00", m.m00);
@@ -105,7 +105,7 @@ namespace Augmenta
 			if (m.m33 != 0) mdata.AddField("m33", m.m33);
 			return mdata;
 		}
-		public static Matrix4x4 ToMatrix4x4(JSONObject obj)
+		internal static Matrix4x4 ToMatrix4x4(JSONObject obj)
 		{
 			Matrix4x4 result = new Matrix4x4();
 			if (obj["m00"]) result.m00 = obj["m00"].f;
@@ -129,7 +129,7 @@ namespace Augmenta
 		/*
 		 * Quaternion
 		 */
-		public static JSONObject FromQuaternion(Quaternion q)
+		internal static JSONObject FromQuaternion(Quaternion q)
 		{
 			JSONObject qdata = JSONObject.obj;
 			if (q.w != 0) qdata.AddField("w", q.w);
@@ -138,7 +138,7 @@ namespace Augmenta
 			if (q.z != 0) qdata.AddField("z", q.z);
 			return qdata;
 		}
-		public static Quaternion ToQuaternion(JSONObject obj)
+		internal static Quaternion ToQuaternion(JSONObject obj)
 		{
 			float x = obj["x"] ? obj["x"].f : 0;
 			float y = obj["y"] ? obj["y"].f : 0;
@@ -149,7 +149,7 @@ namespace Augmenta
 		/*
 		 * Color
 		 */
-		public static JSONObject FromColor(Color c)
+		internal static JSONObject FromColor(Color c)
 		{
 			JSONObject cdata = JSONObject.obj;
 			if (c.r != 0) cdata.AddField("r", c.r);
@@ -158,7 +158,7 @@ namespace Augmenta
 			if (c.a != 0) cdata.AddField("a", c.a);
 			return cdata;
 		}
-		public static Color ToColor(JSONObject obj)
+		internal static Color ToColor(JSONObject obj)
 		{
 			Color c = new Color();
 			for (int i = 0; i < obj.Count; i++)
@@ -176,18 +176,18 @@ namespace Augmenta
 		/*
 		 * Layer Mask
 		 */
-		public static JSONObject FromLayerMask(LayerMask l)
+		internal static JSONObject FromLayerMask(LayerMask l)
 		{
 			JSONObject result = JSONObject.obj;
 			result.AddField("value", l.value);
 			return result;
 		}
-		public static LayerMask ToLayerMask(JSONObject obj)
+		internal static LayerMask ToLayerMask(JSONObject obj)
 		{
 			LayerMask l = new LayerMask { value = (int)obj["value"].n };
 			return l;
 		}
-		public static JSONObject FromRect(Rect r)
+		internal static JSONObject FromRect(Rect r)
 		{
 			JSONObject result = JSONObject.obj;
 			if (r.x != 0) result.AddField("x", r.x);
@@ -196,7 +196,7 @@ namespace Augmenta
 			if (r.width != 0) result.AddField("width", r.width);
 			return result;
 		}
-		public static Rect ToRect(JSONObject obj)
+		internal static Rect ToRect(JSONObject obj)
 		{
 			Rect r = new Rect();
 			for (int i = 0; i < obj.Count; i++)
@@ -211,7 +211,7 @@ namespace Augmenta
 			}
 			return r;
 		}
-		public static JSONObject FromRectOffset(RectOffset r)
+		internal static JSONObject FromRectOffset(RectOffset r)
 		{
 			JSONObject result = JSONObject.obj;
 			if (r.bottom != 0) result.AddField("bottom", r.bottom);
@@ -220,7 +220,7 @@ namespace Augmenta
 			if (r.top != 0) result.AddField("top", r.top);
 			return result;
 		}
-		public static RectOffset ToRectOffset(JSONObject obj)
+		internal static RectOffset ToRectOffset(JSONObject obj)
 		{
 			RectOffset r = new RectOffset();
 			for (int i = 0; i < obj.Count; i++)

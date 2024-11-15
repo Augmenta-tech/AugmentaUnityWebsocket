@@ -14,7 +14,7 @@ namespace Augmenta
         AugmentaPScene nativeScene;
         public GameObject objectsContainer;
 
-        public override void setup(AugmentaPContainer c, AugmentaClient client)
+        internal override void setup(AugmentaPContainer c, AugmentaClient client)
         {
             base.setup(c, client);
             this.nativeScene = c as AugmentaPScene;

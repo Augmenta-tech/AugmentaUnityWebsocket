@@ -10,7 +10,7 @@ namespace Augmenta
     {
         AugmentaPContainer nativeObject;
 
-        public virtual void setup(AugmentaPContainer nativeContainer, AugmentaClient client)
+        internal virtual void setup(AugmentaPContainer nativeContainer, AugmentaClient client)
         {
             this.nativeObject = nativeContainer;
             this.nativeObject.wrapperObject = this;
