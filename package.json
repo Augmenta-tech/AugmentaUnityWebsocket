@@ -1,12 +1,12 @@
 {
   "author": "Augmenta",
   "description": "Augmenta Unity Client.",
-  "displayName": "Augmenta Client",
+  "displayName": "Augmenta Websocket Client",
   "keywords": [
     "unity"
   ],
   "license": "GPL v3",
-  "name": "com.augmenta.augmentaunityclient",
+  "name": "tech.augmenta.augmentaunityclient",
   "repository": "Augmenta-tech/AugmentaUnityWebsocket",
   "unity": "2018.3",
   "unityRelease": "0f1",
