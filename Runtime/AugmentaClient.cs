@@ -63,11 +63,13 @@ namespace Augmenta
         public int downSample = 1;
         public bool streamClouds = true;
         public bool streamClusters = true;
+        public bool streamZonePoints = false;
         public List<string> tags;
 
         int _lastDownSample = 1;
         bool _lastStreamClouds = true;
         bool _lastStreamClusters = true;
+        bool _lastStreamZonePoints = false;
         List<string> _lastTags;
 
 
@@ -224,11 +226,12 @@ namespace Augmenta
                         }
                     }
                 }
-                if (streamClouds != _lastStreamClouds || streamClusters != _lastStreamClusters || downSample != _lastDownSample || tagsChanged)
+                if (streamClouds != _lastStreamClouds || streamClusters != _lastStreamClusters || downSample != _lastDownSample || streamZonePoints != _lastStreamZonePoints || tagsChanged)
                 {
                     sendRegister();
                     _lastStreamClouds = streamClouds;
                     _lastStreamClusters = streamClusters;
+                    _lastStreamZonePoints = streamZonePoints;
                     _lastTags = new List<string>(tags);
                 }
             }
