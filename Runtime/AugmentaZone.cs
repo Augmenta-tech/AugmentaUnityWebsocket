@@ -29,9 +29,9 @@ namespace Augmenta
             if (nativeZone == null) return;
 
             Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
-            Gizmos.color = Color.cyan;
+            Gizmos.color = new Color(nativeZone.color.R / 255f, nativeZone.color.G / 255f, nativeZone.color.B / 255f, nativeZone.color.A / 255f);
 
-            if(nativeZone.shape != null)
+            if (nativeZone.shape != null)
             {
                 switch (nativeZone.shape.shapeType)
                 {
