@@ -28,14 +28,14 @@ namespace Augmenta
                     aObject.transform.localPosition = centroid;
                     break;
                 case PositionUpdateMode.BoxCenter:
-                    aObject.transform.localPosition = (minBounds + maxBounds) / 2;
+                    aObject.transform.localPosition = boxCenter;
                     break;
             }
 
 
             Quaternion rot = Quaternion.AngleAxis(rotation.x, Vector3.right) *
-   Quaternion.AngleAxis(rotation.z, Vector3.forward) *
-   Quaternion.AngleAxis(rotation.y, Vector3.up);
+            Quaternion.AngleAxis(rotation.z, Vector3.forward) *
+            Quaternion.AngleAxis(rotation.y, Vector3.up);
 
             aObject.transform.localRotation = rot;
         }
@@ -69,8 +69,8 @@ namespace Augmenta
         public AugmentaPObject.State state { get { return nativeObject.state; } }
         public Vector3 centroid { get { return nativeObject.centroid; } }
         public Vector3 velocity { get { return nativeObject.velocity; } }
-        public Vector3 minBounds { get { return nativeObject.minBounds; } }
-        public Vector3 maxBounds { get { return nativeObject.maxBounds; } }
+        public Vector3 boxCenter { get { return nativeObject.boxCenter; } }
+        public Vector3 boxSize { get { return nativeObject.boxSize; } }
         public float weight { get { return nativeObject.weight; } }
 
         [Header("Behaviour")]
@@ -133,13 +133,16 @@ namespace Augmenta
 
                 Gizmos.color = c + Color.white * .3f;
 
-                Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.parent.position, transform.rotation, transform.parent.lossyScale);
-                Gizmos.matrix = rotationMatrix;
 
-                Gizmos.DrawWireSphere(centroid, .03f);
 
-                Vector3 boxCenter = (minBounds + maxBounds) / 2;
-                Gizmos.DrawWireCube(boxCenter, maxBounds - minBounds);
+                Matrix4x4 centroidMat = Matrix4x4.TRS(transform.parent.position + centroid, transform.rotation, transform.parent.lossyScale);
+                Matrix4x4 boxCenterMat = Matrix4x4.TRS(transform.parent.position + boxCenter, transform.rotation, transform.parent.lossyScale);
+
+
+                Gizmos.matrix = centroidMat;
+                Gizmos.DrawWireSphere(Vector3.zero, .03f);
+                Gizmos.matrix = boxCenterMat;
+                Gizmos.DrawWireCube(Vector3.zero, boxSize);
             }
         }
     }

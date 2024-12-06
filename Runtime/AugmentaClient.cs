@@ -160,6 +160,7 @@ namespace Augmenta
             coords.AddField("axis", "y_up_left");
             coords.AddField("origin", "bottom_left");
             options.AddField("coordinateMapping", coords);
+            options.AddField("boxRotationMode", "Degrees");
             o.AddField("options", options);
 
             JSONObject ro = JSONObject.Create();
@@ -174,15 +175,15 @@ namespace Augmenta
             try
             {
 #endif
-                if (e.IsText)
-                {
-                    pClient.processMessage(e.Data);
-                }
-                else if (e.IsBinary)
-                {
-                    pClient.processData(Time.time, e.RawData);
+            if (e.IsText)
+            {
+                pClient.processMessage(e.Data);
+            }
+            else if (e.IsBinary)
+            {
+                pClient.processData(Time.time, e.RawData);
 
-                }
+            }
 #if !UNITY_EDITOR
             }
             catch (Exception err)
