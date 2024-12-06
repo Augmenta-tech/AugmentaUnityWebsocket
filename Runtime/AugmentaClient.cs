@@ -86,7 +86,6 @@ namespace Augmenta
         {
             wsMessages = new List<MessageEventArgs>();
             pClient = new AugmentaPleiadesClient(this);
-            tags = new List<string>();
             _lastTags = new List<string>();
         }
 
@@ -171,8 +170,10 @@ namespace Augmenta
 
         void processMessage(MessageEventArgs e)
         {
+#if !UNITY_EDITOR
             try
             {
+#endif
                 if (e.IsText)
                 {
                     pClient.processMessage(e.Data);
@@ -182,12 +183,16 @@ namespace Augmenta
                     pClient.processData(Time.time, e.RawData);
 
                 }
+#if !UNITY_EDITOR
             }
             catch (Exception err)
             {
                 Debug.LogError("Error processing message : " + err);
             }
+
+#endif
         }
+
 
 
         void connect()
@@ -300,7 +305,7 @@ namespace Augmenta
         public override void clear()
         {
             base.clear();
-            if(aWorldContainer != null) GameObject.Destroy(aWorldContainer.gameObject);
+            if (aWorldContainer != null) GameObject.Destroy(aWorldContainer.gameObject);
             aWorldContainer = null;
         }
     }

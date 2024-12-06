@@ -26,6 +26,8 @@ namespace Augmenta
 
         private void OnDrawGizmos()
         {
+            if (nativeZone == null) return;
+
             Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
             Gizmos.color = Color.cyan;
 
