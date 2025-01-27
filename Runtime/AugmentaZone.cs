@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
+using UnityEngine.Events;
 
 namespace Augmenta
 {
@@ -10,14 +11,33 @@ namespace Augmenta
     using AugmentaPZone = PZone<Vector3>;
     public class AugmentaZone : AugmentaContainer
     {
-
         AugmentaPZone nativeZone;
+
+        public int presence;
+        public float density;
+        public Vector2 padXY;
+
+        public UnityEvent<int> objectsEnteredEvent;
+        public UnityEvent<int> objectsExitedEvent;
 
         internal override void setup(AugmentaPContainer c, AugmentaClient client)
         {
             base.setup(c, client);
             this.nativeZone = c as AugmentaPZone;
+            this.nativeZone.enterEvent += onObjectsEntered;
+            this.nativeZone.exitEvent += onObjectsExited;
         }
+      
+        private void onObjectsEntered(int count)
+        {
+            objectsEnteredEvent.Invoke(count);
+        }
+
+        private void onObjectsExited(int count)
+        {
+            objectsExitedEvent.Invoke(count);
+        }
+
 
         public override void Update()
         {
@@ -58,5 +78,7 @@ namespace Augmenta
             }
             //Gizmos.DrawWireCube(Vector3.zero, nativeZone.size);
         }
+
+
     }
 }
