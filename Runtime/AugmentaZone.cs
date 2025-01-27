@@ -27,15 +27,19 @@ namespace Augmenta
             this.nativeZone = c as AugmentaPZone;
             this.nativeZone.enterEvent += onObjectsEntered;
             this.nativeZone.exitEvent += onObjectsExited;
+
+
         }
       
         private void onObjectsEntered(int count)
         {
+            Debug.Log("Objects entered: " + count);
             objectsEnteredEvent.Invoke(count);
         }
 
         private void onObjectsExited(int count)
         {
+            Debug.Log("Objects exited: " + count);
             objectsExitedEvent.Invoke(count);
         }
 
@@ -60,7 +64,10 @@ namespace Augmenta
             if (nativeZone == null) return;
 
             Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
-            Gizmos.color = new Color(nativeZone.color.R / 255f, nativeZone.color.G / 255f, nativeZone.color.B / 255f, nativeZone.color.A / 255f);
+            Color col = new Color(nativeZone.color.R / 255f, nativeZone.color.G / 255f, nativeZone.color.B / 255f, nativeZone.color.A / 255f);
+            Color brighter = new Color(.1f, .1f, .1f);
+
+            Gizmos.color = col;
 
             if (nativeZone.shape != null)
             {
@@ -69,7 +76,41 @@ namespace Augmenta
                     case Shape<Vector3>.ShapeType.Box:
                         BoxShape<Vector3> box = nativeZone.shape as BoxShape<Vector3>;
                         Gizmos.DrawWireCube(box.size/2, box.size);
+
+                        Gizmos.color = col + brighter;
+
+                        //using pad xy, relative 0-1 to draw x and z lines
+                        Vector3 tp = new Vector3(padXY.x * box.size.x, 0, padXY.y * box.size.z);
+                        Gizmos.DrawLine(new Vector3(tp.x, 0, 0), new Vector3(tp.x, 0, box.size.z));
+                        Gizmos.DrawLine(new Vector3(0, 0, tp.z), new Vector3(box.size.x, 0, tp.z));
+
+                        Gizmos.color = col * new Color(1, 1, 1, .2f);
+                        Vector3 tSlider = box.size;
+
+                        if(nativeZone != null)
+                        {
+                            switch(nativeZone.sliderAxis)
+                            {
+                                case 0:
+                                    tSlider.x = sliderValue * box.size.x;
+                                    break;
+
+                                case 1:
+                                    tSlider.y = sliderValue * box.size.y;
+
+                                    break;
+
+                                case 2:
+                                    tSlider.z = sliderValue * box.size.z;
+                                    break;
+                            }
+                        }
+
+                        Debug.Log(nativeZone.sliderAxis);
+                        //draw box in axis
+                        Gizmos.DrawCube(tSlider / 2, tSlider);
                         break;
+
                     case Shape<Vector3>.ShapeType.Sphere:
                         SphereShape<Vector3> sphere = nativeZone.shape as SphereShape<Vector3>;
                         Gizmos.DrawWireSphere(Vector3.zero, sphere.radius);
@@ -90,6 +131,6 @@ namespace Augmenta
             //Gizmos.DrawWireCube(Vector3.zero, nativeZone.size);
         }
 
-
+        
     }
 }
