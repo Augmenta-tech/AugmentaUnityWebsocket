@@ -15,6 +15,7 @@ namespace Augmenta
 
         public int presence;
         public float density;
+        public float sliderValue;
         public Vector2 padXY;
 
         public UnityEvent<int> objectsEnteredEvent;
@@ -42,6 +43,10 @@ namespace Augmenta
         public override void Update()
         {
             base.Update();
+            this.presence = nativeZone.presence;
+            this.density = nativeZone.density;
+            this.sliderValue = nativeZone.sliderValue;
+            this.padXY = new Vector2(nativeZone.padX, nativeZone.padY);
         }
 
         private void OnDrawGizmos()
