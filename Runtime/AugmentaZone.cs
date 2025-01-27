@@ -43,6 +43,12 @@ namespace Augmenta
         public override void Update()
         {
             base.Update();
+            if(nativeZone == null)
+            {
+                Debug.LogWarning("Native zone is null");
+                return;
+            }
+
             this.presence = nativeZone.presence;
             this.density = nativeZone.density;
             this.sliderValue = nativeZone.sliderValue;
