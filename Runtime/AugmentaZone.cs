@@ -101,7 +101,6 @@ namespace Augmenta
                             }
                         }
 
-                        Debug.Log(nativeZone.sliderAxis);
                         //draw box in axis
                         Gizmos.DrawCube(tSlider / 2, tSlider);
                         break;
