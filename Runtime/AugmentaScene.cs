@@ -6,8 +6,10 @@ using System.Runtime.InteropServices;
 
 namespace Augmenta
 {
-    using AugmentaPContainer = PContainer<Vector3>;
     using AugmentaPScene = PScene<Vector3>;
+    using AugmentaPContainer = PContainer<Vector3>;
+
+
     public class AugmentaScene : AugmentaContainer
     {
 

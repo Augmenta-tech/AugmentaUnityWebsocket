@@ -39,18 +39,19 @@ namespace Augmenta
             aObject.transform.localRotation = rot;
         }
 
-        protected override void updateCloudPoint(ref Vector3 pointInArray, Vector3 point)
-        {
-            if (pointMode == CoordMode.Absolute) pointInArray = point;
-            else pointInArray = aObject.transform.parent.TransformPoint(point);
-        }
+        //We're deciding that any transformation will be done by the client, this avoids doing a point-by-point callback
+        //protected override void updateCloudPoint(ref Vector3 pointInArray, Vector3 point)
+        //{
+        //    if (pointMode == CoordMode.Absolute) pointInArray = point;
+        //    else pointInArray = aObject.transform.parent.TransformPoint(point);
+        //}
 
-        protected override void updateClusterPoint(ref Vector3 pointInArray, Vector3 point)
-        {
-            if (pointMode == CoordMode.Absolute) pointInArray = aObject.transform.parent.InverseTransformPoint(point);
-            else pointInArray = point;
-            //Debug.Log("update cluster point : " +pointInArray);
-        }
+        //protected override void updateClusterPoint(ref Vector3 pointInArray, Vector3 point)
+        //{
+        //    if (pointMode == CoordMode.Absolute) pointInArray = aObject.transform.parent.InverseTransformPoint(point);
+        //    else pointInArray = point;
+        //    //Debug.Log("update cluster point : " +pointInArray);
+        //}
 
         public override void kill(bool immediate = false)
         {
