@@ -13,16 +13,27 @@ namespace Augmenta
         public AugmentaPObject() { }
         public AugmentaPObject(AugmentaObject ao = null)
         {
+            centroid = Vector3.zero;
+            boxCenter = Vector3.zero;
+            boxSize = Vector3.one;
+            rotation = Vector3.zero;
+
             aObject = ao;
             aObject.setNativeObject(this);
         }
 
         override protected void updateTransform()
         {
+            if (!isCluster)
+            {
+                return;
+            }
+
             switch (posUpdateMode)
             {
                 case PositionUpdateMode.None:
                     break;
+
                 case PositionUpdateMode.Centroid:
                     aObject.transform.localPosition = centroid;
                     break;
@@ -88,6 +99,11 @@ namespace Augmenta
             this.nativeObject = nativeObject;
         }
 
+        private void Awake()
+        {
+            //transform.localPosition = Vector3.zero;
+        }
+
         // Update is called once per frame
         void Update()
         {
@@ -128,21 +144,28 @@ namespace Augmenta
                 Color c = Color.HSVToRGB((objectID * .1f) % 1, 1, 1); //Color.red;// getColor();
                 if (state == AugmentaPObject.State.Ghost) c = Color.gray / 2;
 
-                Gizmos.color = c;
-                foreach (var p in points) Gizmos.DrawLine(p, p + Vector3.forward * .01f);
-
-                Gizmos.color = c + Color.white * .3f;
+                
 
 
-
+                Matrix4x4 mat = Matrix4x4.TRS(transform.parent.position, Quaternion.identity, Vector3.one);
                 Matrix4x4 centroidMat = Matrix4x4.TRS(transform.parent.position + centroid, transform.rotation, transform.parent.lossyScale);
                 Matrix4x4 boxCenterMat = Matrix4x4.TRS(transform.parent.position + boxCenter, transform.rotation, transform.parent.lossyScale);
 
+                Gizmos.matrix = mat;
 
-                Gizmos.matrix = centroidMat;
-                Gizmos.DrawWireSphere(Vector3.zero, .03f);
-                Gizmos.matrix = boxCenterMat;
-                Gizmos.DrawWireCube(Vector3.zero, boxSize);
+                Gizmos.color = c;
+                foreach (var p in points) Gizmos.DrawLine(p, p + Vector3.forward * .01f);
+
+                if (nativeObject.isCluster)
+                {
+                    Gizmos.color = c + Color.white * .3f;
+
+                    Gizmos.matrix = centroidMat;
+                    Gizmos.DrawWireSphere(Vector3.zero, .03f);
+
+                    Gizmos.matrix = boxCenterMat;
+                    Gizmos.DrawWireCube(Vector3.zero, boxSize);
+                }
             }
         }
     }

@@ -182,6 +182,7 @@ namespace Augmenta
             if (e.IsText)
             {
                 pClient.processMessage(e.Data);
+                Debug.Log(e.Data.ToString());
             }
             else if (e.IsBinary)
             {
@@ -289,6 +290,7 @@ namespace Augmenta
         public AugmentaPleiadesClient(AugmentaClient client)
         {
             this.client = client;
+
         }
 
         //The following overrides are necessary in Unity because we need to create MonoBehaviour objects aside the "native" PObject (can't inherit more than one class)
@@ -309,7 +311,7 @@ namespace Augmenta
             AugmentaPContainer p = base.createContainerInternal(o);
             AugmentaContainer c = new GameObject().AddComponent<AugmentaContainer>();
             c.setup(p, client);
-            c.transform.parent = client.transform;
+            c.transform.SetParent(client.transform, false);
             aWorldContainer = c;
             return p;
         }

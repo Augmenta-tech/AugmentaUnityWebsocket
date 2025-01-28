@@ -308,7 +308,7 @@ namespace Augmenta
 		}
 		void Parse(string str, int maxDepth = -2, bool storeExcessLevels = false, bool strict = false)
 		{
-            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("EN-US");
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             
 			if (!string.IsNullOrEmpty(str))
 			{
