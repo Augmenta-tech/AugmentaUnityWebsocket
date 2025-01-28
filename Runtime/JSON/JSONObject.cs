@@ -43,6 +43,8 @@ namespace Augmenta
 	public static Queue<JSONObject> releaseQueue = new Queue<JSONObject>();
 #endif
 
+        
+        
 		const int MAX_DEPTH = 100;
 		const string INFINITY = "\"INFINITY\"";
 		const string NEGINFINITY = "\"NEGINFINITY\"";
@@ -306,6 +308,8 @@ namespace Augmenta
 		}
 		void Parse(string str, int maxDepth = -2, bool storeExcessLevels = false, bool strict = false)
 		{
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("EN-US");
+            
 			if (!string.IsNullOrEmpty(str))
 			{
 				str = str.Trim(WHITESPACE);
