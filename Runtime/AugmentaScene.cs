@@ -35,7 +35,7 @@ namespace Augmenta
         {
             if(nativeScene == null) return;
             Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
-            Gizmos.color = Color.red;
+            Gizmos.color = Color.white * .5f;
             Gizmos.DrawWireCube(nativeScene.size / 2, nativeScene.size);
         }
     }
