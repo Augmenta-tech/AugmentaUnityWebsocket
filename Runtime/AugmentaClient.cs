@@ -79,6 +79,8 @@ namespace Augmenta
         bool _lastUsePolling = false;
         List<string> _lastTags;
 
+        bool hasReceivedSincePolling = false;
+
 
         [Header("Events")]
         public UnityEvent<AugmentaObject> OnObjectCreated;
@@ -94,6 +96,7 @@ namespace Augmenta
             wsMessages = new List<MessageEventArgs>();
             pClient = new AugmentaPleiadesClient(this);
             _lastTags = new List<string>();
+
         }
 
 
@@ -195,12 +198,14 @@ namespace Augmenta
                 try
                 {
                     pClient.processData(Time.time, e.RawData, 0, useCompression);
+
                 }
                 catch(Exception ex)
                 {
                     Debug.LogWarning("Error in processing " + ex.Message);
                 }
 
+                hasReceivedSincePolling = true;
 
             }
 #if !UNITY_EDITOR
@@ -219,6 +224,14 @@ namespace Augmenta
         {
             Debug.Log("Connecting websocket...");
             StartCoroutine(connectCoroutine());
+        }
+
+        void sendPoll()
+        {
+            hasReceivedSincePolling = false;
+            JSONObject poll = JSONObject.Create();
+            poll.AddField("poll", true);
+            websocket.Send(poll.ToString());
         }
 
         IEnumerator connectCoroutine()
@@ -275,6 +288,9 @@ namespace Augmenta
 
                     _lastTags = new List<string>(tags);
                 }
+
+
+                if (connected && usePolling && hasReceivedSincePolling) sendPoll(); //we can do it here since update will be shared with the engine runtime, so it will be called once per frame
             }
 
 
