@@ -74,35 +74,38 @@ namespace Augmenta
 
                         Gizmos.color = col + brighter;
 
-                        //using pad xy, relative 0-1 to draw x and z lines
-                        Vector3 tp = new Vector3(padXY.x * box.size.x, 0, padXY.y * box.size.z);
-                        Gizmos.DrawLine(new Vector3(tp.x, 0, 0), new Vector3(tp.x, 0, box.size.z));
-                        Gizmos.DrawLine(new Vector3(0, 0, tp.z), new Vector3(box.size.x, 0, tp.z));
-
-                        Gizmos.color = col * new Color(1, 1, 1, .2f);
-                        Vector3 tSlider = box.size;
-
-                        if (nativeZone != null)
+                        if (drawDebug)
                         {
-                            switch (nativeZone.sliderAxis)
+                            //using pad xy, relative 0-1 to draw x and z lines
+                            Vector3 tp = new Vector3(padXY.x * box.size.x, 0, padXY.y * box.size.z);
+                            Gizmos.DrawLine(new Vector3(tp.x, 0, 0), new Vector3(tp.x, 0, box.size.z));
+                            Gizmos.DrawLine(new Vector3(0, 0, tp.z), new Vector3(box.size.x, 0, tp.z));
+
+                            Gizmos.color = col * new Color(1, 1, 1, .2f);
+                            Vector3 tSlider = box.size;
+
+                            if (nativeZone != null)
                             {
-                                case 0:
-                                    tSlider.x = sliderValue * box.size.x;
-                                    break;
+                                switch (nativeZone.sliderAxis)
+                                {
+                                    case 0:
+                                        tSlider.x = sliderValue * box.size.x;
+                                        break;
 
-                                case 1:
-                                    tSlider.y = sliderValue * box.size.y;
+                                    case 1:
+                                        tSlider.y = sliderValue * box.size.y;
 
-                                    break;
+                                        break;
 
-                                case 2:
-                                    tSlider.z = sliderValue * box.size.z;
-                                    break;
+                                    case 2:
+                                        tSlider.z = sliderValue * box.size.z;
+                                        break;
+                                }
                             }
-                        }
 
-                        //draw box in axis
-                        Gizmos.DrawCube(tSlider / 2, tSlider);
+                            //draw box in axis
+                            Gizmos.DrawCube(tSlider / 2, tSlider);
+                        }
                         break;
 
                     case Shape<Vector3>.ShapeType.Sphere:

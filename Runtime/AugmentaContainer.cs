@@ -9,6 +9,8 @@ namespace Augmenta
     {
         AugmentaPContainer nativeObject;
 
+        [Header("Debug")]
+        public bool drawDebug;
         internal virtual void setup(AugmentaPContainer nativeContainer, AugmentaClient client)
         {
             this.nativeObject = nativeContainer;

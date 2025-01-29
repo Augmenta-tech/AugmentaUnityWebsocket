@@ -10,6 +10,7 @@ namespace Augmenta
     {
         AugmentaObject aObject;
 
+
         public AugmentaPObject() { }
         public AugmentaPObject(AugmentaObject ao = null)
         {
@@ -143,9 +144,6 @@ namespace Augmenta
             {
                 Color c = Color.HSVToRGB((objectID * .1f) % 1, 1, 1); //Color.red;// getColor();
                 if (state == AugmentaPObject.State.Ghost) c = Color.gray / 2;
-
-                
-
 
                 Matrix4x4 mat = Matrix4x4.TRS(transform.parent.position, Quaternion.identity, Vector3.one);
                 Matrix4x4 centroidMat = Matrix4x4.TRS(transform.parent.position + centroid, transform.rotation, transform.parent.lossyScale);

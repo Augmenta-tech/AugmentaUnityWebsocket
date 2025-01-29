@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using UnityEngine.Events;
 using WebSocketSharp;
+using ZstdNet;
 
 namespace Augmenta
 {
@@ -65,6 +66,8 @@ namespace Augmenta
         public bool streamClusters = true;
         public bool streamClusterPoints = true;
         public bool streamZonePoints = false;
+        public bool useCompression = false;
+        public bool usePolling = false;
         public List<string> tags;
 
         int _lastDownSample = 1;
@@ -72,6 +75,8 @@ namespace Augmenta
         bool _lastStreamClusters = true;
         bool _lastStreamClusterPoints = true;
         bool _lastStreamZonePoints = false;
+        bool _lastUseCompression = false;
+        bool _lastUsePolling = false;
         List<string> _lastTags;
 
 
@@ -157,6 +162,8 @@ namespace Augmenta
             options.AddField("streamClusters", streamClusters);
             options.AddField("streamClusterPoints", streamClusterPoints);
             options.AddField("streamZonePoints", streamZonePoints);
+            options.AddField("useCompression", useCompression);
+            options.AddField("usePolling", usePolling);
             JSONObject tagsO = JSONObject.Create();
             foreach (var t in tags) tagsO.Add(t);
             options.AddField("tags", tagsO);
@@ -182,11 +189,18 @@ namespace Augmenta
             if (e.IsText)
             {
                 pClient.processMessage(e.Data);
-                Debug.Log(e.Data.ToString());
             }
             else if (e.IsBinary)
             {
-                pClient.processData(Time.time, e.RawData);
+                try
+                {
+                    pClient.processData(Time.time, e.RawData, 0, useCompression);
+                }
+                catch(Exception ex)
+                {
+                    Debug.LogWarning("Error in processing " + ex.Message);
+                }
+
 
             }
 #if !UNITY_EDITOR
@@ -237,18 +251,27 @@ namespace Augmenta
                         }
                     }
                 }
+
+
                 if (streamClouds != _lastStreamClouds 
                     || streamClusters != _lastStreamClusters 
                     || streamClusterPoints != _lastStreamClusterPoints
                     || streamZonePoints != _lastStreamZonePoints 
-                    || downSample != _lastDownSample 
+                    || downSample != _lastDownSample
+                    || useCompression != _lastUseCompression
+                    || usePolling != _lastUsePolling
                     || tagsChanged)
                 {
+
                     sendRegister();
+
                     _lastStreamClouds = streamClouds;
                     _lastStreamClusters = streamClusters;
                     _lastStreamClusterPoints = streamClusterPoints;
                     _lastStreamZonePoints = streamZonePoints;
+                    _lastDownSample = downSample;
+                    _lastUseCompression = useCompression;
+                    _lastUsePolling = usePolling;
 
                     _lastTags = new List<string>(tags);
                 }
@@ -290,7 +313,6 @@ namespace Augmenta
         public AugmentaPleiadesClient(AugmentaClient client)
         {
             this.client = client;
-
         }
 
         //The following overrides are necessary in Unity because we need to create MonoBehaviour objects aside the "native" PObject (can't inherit more than one class)
