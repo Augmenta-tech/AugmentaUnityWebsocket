@@ -46,6 +46,7 @@ namespace Augmenta
         float lastConnectTime;
         float lastMessageTime;
 
+        public enum ProtocolVersion { Latest = 0, V2 = 2 };
 
         [Header("Spawn")]
         public GameObject scenePrefab;
@@ -61,6 +62,7 @@ namespace Augmenta
         public bool receivingData = false;
 
         [Header("Streaming Options")]
+        public ProtocolVersion version = ProtocolVersion.Latest;
         public int downSample = 1;
         public bool streamClouds = true;
         public bool streamClusters = true;
@@ -160,6 +162,7 @@ namespace Augmenta
             o.AddField("id", clientID);
             o.AddField("name", clientName);
             JSONObject options = JSONObject.Create();
+            if(version != ProtocolVersion.Latest) options.AddField("version", (int)version);
             options.AddField("downSample", downSample);
             options.AddField("streamClouds", streamClouds);
             options.AddField("streamClusters", streamClusters);
