@@ -8,7 +8,6 @@ using ZstdNet;
 
 namespace Augmenta
 {
-    using AugmentaPContainer = PContainer<Vector3>;
     public class AugmentaClient : MonoBehaviour
     {
         public string ipAddress
@@ -17,10 +16,10 @@ namespace Augmenta
             set
             {
                 _ipAddress = value;
-                if (websocket != null)
+                if (websocketClient != null)
                 {
-                    websocket.Close();
-                    websocket = null;
+                    websocketClient.Close();
+                    websocketClient = null;
                 }
             }
         }
@@ -31,16 +30,16 @@ namespace Augmenta
             set
             {
                 _port = value;
-                if (websocket != null)
+                if (websocketClient != null)
                 {
-                    websocket.Close();
-                    websocket = null;
+                    websocketClient.Close();
+                    websocketClient = null;
                 }
             }
         }
 
-        WebSocket websocket;
-        AugmentaPleiadesClient pClient;
+        WebSocket websocketClient;
+        AugmentaUnityClient augmentaClient;
 
         float lastUpdateTime;
         float lastConnectTime;
@@ -96,7 +95,7 @@ namespace Augmenta
         private void Awake()
         {
             wsMessages = new List<MessageEventArgs>();
-            pClient = new AugmentaPleiadesClient(this);
+            augmentaClient = new AugmentaUnityClient(this);
             _lastTags = new List<string>();
 
         }
@@ -104,46 +103,46 @@ namespace Augmenta
 
         void OnDisable()
         {
-            websocket.Close();
-            pClient.clear();
-            pClient = null;
+            websocketClient.Close();
+            augmentaClient.Clear();
+            augmentaClient = null;
             wsMessages.Clear();
         }
 
         private void OnEnable()
         {
             wsMessages = new List<MessageEventArgs>();
-            pClient = new AugmentaPleiadesClient(this);
+            augmentaClient = new AugmentaUnityClient(this);
         }
 
         void Start()
         {
-            init();
-            connect();
+            Init();
+            Connect();
         }
 
-        void init()
+        void Init()
         {
-            websocket = new WebSocket("ws://" + ipAddress + ":" + port);
-            websocket.OnOpen += (sender, e) =>
+            websocketClient = new WebSocket("ws://" + ipAddress + ":" + port);
+            websocketClient.OnOpen += (sender, e) =>
             {
                 connected = true;
                 Debug.Log("Connection " + "ws://" + ipAddress + ":" + port + " opened !");
-                sendRegister();
+                SendRegister();
             };
 
-            websocket.OnError += (sender, e) =>
+            websocketClient.OnError += (sender, e) =>
             {
                 Debug.Log("Error! " + e.Message);
             };
 
-            websocket.OnClose += (sender, e) =>
+            websocketClient.OnClose += (sender, e) =>
             {
                 connected = false;
                 Debug.Log("Connection " + "ws://" + ipAddress + ":" + port + " closed.");
             };
 
-            websocket.OnMessage += (sender, e) =>
+            websocketClient.OnMessage += (sender, e) =>
             {
                 connected = true;
                 lastMessageTime = lastUpdateTime;
@@ -156,37 +155,27 @@ namespace Augmenta
         }
 
 
-        public void sendRegister()
+        public void SendRegister()
         {
-            JSONObject o = JSONObject.Create();
-            o.AddField("id", clientID);
-            o.AddField("name", clientName);
-            JSONObject options = JSONObject.Create();
-            if(version != ProtocolVersion.Latest) options.AddField("version", (int)version);
-            options.AddField("downSample", downSample);
-            options.AddField("streamClouds", streamClouds);
-            options.AddField("streamClusters", streamClusters);
-            options.AddField("streamClusterPoints", streamClusterPoints);
-            options.AddField("streamZonePoints", streamZonePoints);
-            options.AddField("useCompression", useCompression);
-            options.AddField("usePolling", usePolling);
-            JSONObject tagsO = JSONObject.Create();
-            foreach (var t in tags) tagsO.Add(t);
-            options.AddField("tags", tagsO);
-            JSONObject coords = JSONObject.Create();
-            coords.AddField("axis", "y_up_left");
-            coords.AddField("origin", "bottom_left");
-            options.AddField("coordinateMapping", coords);
-            options.AddField("boxRotationMode", "Degrees");
-            o.AddField("options", options);
+            Augmenta.ProtocolOptions options = new Augmenta.ProtocolOptions();
+            options.downSample = downSample;
+            options.streamClouds = streamClouds;
+            options.streamClusters = streamClusters;
+            options.streamClusterPoints = streamClusterPoints;
+            // ?
+            options.streamZonePoints = streamZonePoints;
+            options.useCompression = useCompression;
+            options.usePolling = usePolling;
+            options.boxRotationMode = Augmenta.ProtocolOptions.RotationMode.Degrees;
+            options.tags = tags;
+            options.axisTransform.axis = Augmenta.AxisTransform.AxisMode.YUpLeftHanded;
+            options.axisTransform.origin = Augmenta.AxisTransform.OriginMode.BottomLeft;
 
-            JSONObject ro = JSONObject.Create();
-            ro.AddField("register", o);
-
-            websocket.Send(ro.ToString());
+            var message = augmentaClient.GetRegisterMessage(clientName, options);
+            websocketClient.Send(message);
         }
 
-        void processMessage(MessageEventArgs e)
+        void ProcessMessage(MessageEventArgs e)
         {
 #if !UNITY_EDITOR
             try
@@ -194,13 +183,13 @@ namespace Augmenta
 #endif
             if (e.IsText)
             {
-                pClient.processMessage(e.Data);
+                augmentaClient.ProcessMessage(e.Data);
             }
             else if (e.IsBinary)
             {
                 try
                 {
-                    pClient.processData(Time.time, e.RawData, 0, useCompression);
+                    augmentaClient.ProcessData(Time.time, e.RawData, 0, useCompression);
 
                 }
                 catch(Exception ex)
@@ -223,25 +212,23 @@ namespace Augmenta
 
 
 
-        void connect()
+        void Connect()
         {
             Debug.Log("Connecting websocket...");
-            StartCoroutine(connectCoroutine());
+            StartCoroutine(ConnectCoroutine());
         }
 
-        void sendPoll()
+        void SendPoll()
         {
-            hasReceivedSincePolling = false;
-            JSONObject poll = JSONObject.Create();
-            poll.AddField("poll", true);
-            websocket.Send(poll.ToString());
+            var message = augmentaClient.GetPollMessage();
+            websocketClient.Send(message);
         }
 
-        IEnumerator connectCoroutine()
+        IEnumerator ConnectCoroutine()
         {
             lastConnectTime = Time.time;
-            websocket.Close();
-            websocket.Connect();
+            websocketClient.Close();
+            websocketClient.Connect();
             yield return null;
         }
 
@@ -249,7 +236,7 @@ namespace Augmenta
         /*async*/
         void Update()
         {
-            if (websocket == null) init();
+            if (websocketClient == null) Init();
 
 
             if (connected)
@@ -279,7 +266,7 @@ namespace Augmenta
                     || tagsChanged)
                 {
 
-                    sendRegister();
+                    SendRegister();
 
                     _lastStreamClouds = streamClouds;
                     _lastStreamClusters = streamClusters;
@@ -293,50 +280,50 @@ namespace Augmenta
                 }
 
 
-                if (connected && usePolling && hasReceivedSincePolling) sendPoll(); //we can do it here since update will be shared with the engine runtime, so it will be called once per frame
+                if (connected && usePolling && hasReceivedSincePolling) SendPoll(); //we can do it here since update will be shared with the engine runtime, so it will be called once per frame
             }
 
 
 #if !UNITY_WEBGL || UNITY_EDITOR
-            if ((!connected || !websocket.IsAlive) && Time.time - lastConnectTime > 1)
+            if ((!connected || !websocketClient.IsAlive) && Time.time - lastConnectTime > 1)
             {
-                connect();
+                Connect();
             }
 
 #endif
             lastUpdateTime = Time.time;
 
             isProcessing = true;
-            foreach (var e in wsMessages) processMessage(e);
+            foreach (var e in wsMessages) ProcessMessage(e);
             wsMessages.Clear();
             isProcessing = false;
 
 
-            pClient.update(Time.time);
+            augmentaClient.Update(Time.time);
             receivingData = (Time.time - lastMessageTime) < 1;
         }
 
 
         private void OnApplicationQuit()
         {
-            websocket.Close();
+            websocketClient.Close();
         }
 
     }
 
-    internal class AugmentaPleiadesClient : PleiadesClient<AugmentaPObject, Vector3>
+    internal class AugmentaUnityClient : Augmenta.Client<AugmentaUnityObject, Vector3>
     {
         public AugmentaClient client;
         public AugmentaContainer aWorldContainer;
 
-        public AugmentaPleiadesClient(AugmentaClient client)
+        public AugmentaUnityClient(AugmentaClient client)
         {
             this.client = client;
         }
 
         //The following overrides are necessary in Unity because we need to create MonoBehaviour objects aside the "native" PObject (can't inherit more than one class)
         //In a regular C# project, you may not need to override these methods
-        override protected BasePObject createObject()
+        override protected Augmenta.BaseObject CreateObject()
         {
             AugmentaObject ao = GameObject.Instantiate(client.objectPrefab).GetComponent<AugmentaObject>();
             if (workingScene != null)
@@ -344,22 +331,20 @@ namespace Augmenta
             else
                 ao.transform.parent = client.transform;
 
-            return new AugmentaPObject(ao);
+            return new AugmentaUnityObject(ao);
         }
 
-        override protected AugmentaPContainer createContainerInternal(JSONObject o)
+        override protected void OnContainerCreated(ref Augmenta.Container<Vector3> newContainer)
         {
-            AugmentaPContainer p = base.createContainerInternal(o);
             AugmentaContainer c = new GameObject().AddComponent<AugmentaContainer>();
-            c.setup(p, client);
+            c.Setup(newContainer, client);
             c.transform.SetParent(client.transform, false);
             aWorldContainer = c;
-            return p;
         }
 
-        public override void clear()
+        public override void Clear()
         {
-            base.clear();
+            base.Clear();
             if (aWorldContainer != null) GameObject.Destroy(aWorldContainer.gameObject);
             aWorldContainer = null;
         }

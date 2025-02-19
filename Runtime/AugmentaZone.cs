@@ -7,13 +7,9 @@ using UnityEngine.Events;
 
 namespace Augmenta
 {
-    using static Augmenta.BasePObject;
-    using AugmentaPContainer = PContainer<Vector3>;
-    using AugmentaPZone = PZone<Vector3>;
-
     public class AugmentaZone : AugmentaContainer
     {
-        AugmentaPZone nativeZone;
+        Augmenta.Zone<Vector3> nativeZone;
 
         public int presence { get { return nativeZone.presence; } }
         public float density { get { return nativeZone.density; } }
@@ -24,22 +20,22 @@ namespace Augmenta
         public UnityEvent<int> objectsEnteredEvent;
         public UnityEvent<int> objectsExitedEvent;
 
-        internal override void setup(AugmentaPContainer c, AugmentaClient client)
+        internal override void Setup(Augmenta.Container<Vector3> c, AugmentaClient client)
         {
-            base.setup(c, client);
-            this.nativeZone = c as AugmentaPZone;
+            base.Setup(c, client);
+            this.nativeZone = c as Augmenta.Zone<Vector3>;
             this.nativeZone.wrapperObject = this;
-            this.nativeZone.enterEvent += onObjectsEntered;
-            this.nativeZone.exitEvent += onObjectsExited;
+            this.nativeZone.enterEvent += OnObjectsEntered;
+            this.nativeZone.exitEvent += OnObjectsExited;
         }
 
-        private void onObjectsEntered(int count)
+        private void OnObjectsEntered(int count)
         {
             Debug.Log("Objects entered: " + count);
             objectsEnteredEvent.Invoke(count);
         }
 
-        private void onObjectsExited(int count)
+        private void OnObjectsExited(int count)
         {
             Debug.Log("Objects exited: " + count);
             objectsExitedEvent.Invoke(count);

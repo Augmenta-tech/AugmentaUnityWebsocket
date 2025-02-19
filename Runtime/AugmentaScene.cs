@@ -6,20 +6,16 @@ using System.Runtime.InteropServices;
 
 namespace Augmenta
 {
-    using AugmentaPScene = PScene<Vector3>;
-    using AugmentaPContainer = PContainer<Vector3>;
-
-
     public class AugmentaScene : AugmentaContainer
     {
 
-        AugmentaPScene nativeScene;
+        Augmenta.Scene<Vector3> nativeScene;
         public GameObject objectsContainer;
 
-        internal override void setup(AugmentaPContainer c, AugmentaClient client)
+        internal override void Setup(Augmenta.Container<Vector3> c, AugmentaClient client)
         {
-            base.setup(c, client);
-            this.nativeScene = c as AugmentaPScene;
+            base.Setup(c, client);
+            this.nativeScene = c as Augmenta.Scene<Vector3>;
 
             objectsContainer = new GameObject("Objects");
             objectsContainer.transform.parent = transform;

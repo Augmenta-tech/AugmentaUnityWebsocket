@@ -4,14 +4,13 @@ using UnityEngine.UIElements;
 
 namespace Augmenta
 {
-    using AugmentaPContainer = PContainer<Vector3>;
     public class AugmentaContainer : MonoBehaviour
     {
-        AugmentaPContainer nativeObject;
+        Augmenta.Container<Vector3> nativeObject;
 
         [Header("Debug")]
         public bool drawDebug;
-        internal virtual void setup(AugmentaPContainer nativeContainer, AugmentaClient client)
+        internal virtual void Setup(Augmenta.Container<Vector3> nativeContainer, AugmentaClient client)
         {
             this.nativeObject = nativeContainer;
             this.nativeObject.wrapperObject = this;
@@ -20,7 +19,7 @@ namespace Augmenta
 
             foreach (var c in nativeObject.children)
             {
-                AugmentaPContainer childC = c as AugmentaPContainer;
+                Augmenta.Container<Vector3> childC = c as Augmenta.Container<Vector3>;
                 GameObject oPrefab;
 
                 switch (c.containerType)
@@ -43,7 +42,7 @@ namespace Augmenta
 
                 AugmentaContainer child = oPrefab != null ? Instantiate(oPrefab).GetComponent<AugmentaContainer>() : new GameObject().AddComponent<AugmentaContainer>();
                 child.transform.parent = transform;
-                child.setup(childC, client);
+                child.Setup(childC, client);
 
             }
 

@@ -6,13 +6,13 @@ using System.Runtime.InteropServices;
 
 namespace Augmenta
 {
-    public class AugmentaPObject : GenericPObject<Vector3> //this is Vector3 from UnityEngine, not System.Numerics (this is why we need to create a new class)
+    public class AugmentaUnityObject : Augmenta.GenericObject<Vector3> //this is Vector3 from UnityEngine, not System.Numerics (this is why we need to create a new class)
     {
         AugmentaObject aObject;
 
-
-        public AugmentaPObject() { }
-        public AugmentaPObject(AugmentaObject ao = null)
+        public AugmentaUnityObject() { }
+        
+        public AugmentaUnityObject(AugmentaObject ao = null)
         {
             centroid = Vector3.zero;
             boxCenter = Vector3.zero;
@@ -20,10 +20,10 @@ namespace Augmenta
             rotation = Vector3.zero;
 
             aObject = ao;
-            aObject.setNativeObject(this);
+            aObject.SetNativeObject(this);
         }
 
-        override protected void updateTransform()
+        override protected void UpdateTransform()
         {
             if (!isCluster)
             {
@@ -65,20 +65,20 @@ namespace Augmenta
         //    //Debug.Log("update cluster point : " +pointInArray);
         //}
 
-        public override void kill(bool immediate = false)
+        public override void Kill(bool immediate = false)
         {
-            aObject.kill(immediate);
+            aObject.Kill(immediate);
         }
     }
 
     public class AugmentaObject : MonoBehaviour
     {
 
-        AugmentaPObject nativeObject;
+        AugmentaUnityObject nativeObject;
 
         public int objectID { get { return nativeObject.objectID; } }
         public Vector3[] points { get { return nativeObject.points.ToArray(); } }
-        public AugmentaPObject.State state { get { return nativeObject.state; } }
+        public AugmentaUnityObject.State state { get { return nativeObject.state; } }
         public Vector3 centroid { get { return nativeObject.centroid; } }
         public Vector3 velocity { get { return nativeObject.velocity; } }
         public Vector3 boxCenter { get { return nativeObject.boxCenter; } }
@@ -95,7 +95,7 @@ namespace Augmenta
         public delegate void OnRemoveEvent(AugmentaObject obj);
         public event OnRemoveEvent onRemove;
 
-        public void setNativeObject(AugmentaPObject nativeObject)
+        public void SetNativeObject(AugmentaUnityObject nativeObject)
         {
             this.nativeObject = nativeObject;
         }
@@ -109,16 +109,16 @@ namespace Augmenta
         void Update()
         {
             if (nativeObject == null) return;
-            nativeObject.update(Time.time);
+            nativeObject.Update(Time.time);
         }
 
-        public void updateData(byte[] data, int offset)
+        public void UpdateData(byte[] data, int offset)
         {
             if (nativeObject == null) return;
-            nativeObject.updateData(Time.time, data, offset);
+            nativeObject.UpdateData(Time.time, data, offset);
         }
 
-        public void kill(bool immediate)
+        public void Kill(bool immediate)
         {
             onRemove?.Invoke(this);
             if (immediate || killDelayTime == 0)
@@ -128,10 +128,10 @@ namespace Augmenta
             }
 
 
-            StartCoroutine(killForReal(killDelayTime));
+            StartCoroutine(KillForReal(killDelayTime));
         }
 
-        IEnumerator killForReal(float timeBeforeKill)
+        IEnumerator KillForReal(float timeBeforeKill)
         {
             yield return new WaitForSeconds(timeBeforeKill);
             Destroy(gameObject);
@@ -143,7 +143,7 @@ namespace Augmenta
             if (drawDebug)
             {
                 Color c = Color.HSVToRGB((objectID * .1f) % 1, 1, 1); //Color.red;// getColor();
-                if (state == AugmentaPObject.State.Ghost) c = Color.gray / 2;
+                if (state == AugmentaUnityObject.State.Ghost) c = Color.gray / 2;
 
                 Matrix4x4 mat = Matrix4x4.TRS(transform.parent.position, Quaternion.identity, Vector3.one);
                 Matrix4x4 centroidMat = Matrix4x4.TRS(transform.parent.position + centroid, transform.rotation, transform.parent.lossyScale);
