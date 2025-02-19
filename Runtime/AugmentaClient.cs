@@ -6,7 +6,7 @@ using UnityEngine.Events;
 using WebSocketSharp;
 using ZstdNet;
 
-namespace Augmenta
+namespace AugmentaWebsocketClient
 {
     public class AugmentaClient : MonoBehaviour
     {
@@ -190,7 +190,6 @@ namespace Augmenta
                 try
                 {
                     augmentaClient.ProcessData(Time.time, e.RawData, 0, useCompression);
-
                 }
                 catch(Exception ex)
                 {
@@ -289,7 +288,6 @@ namespace Augmenta
             {
                 Connect();
             }
-
 #endif
             lastUpdateTime = Time.time;
 

@@ -4,11 +4,10 @@ using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Augmenta
+namespace AugmentaWebsocketClient
 {
     public class AugmentaScene : AugmentaContainer
     {
-
         Augmenta.Scene<Vector3> nativeScene;
         public GameObject objectsContainer;
 
@@ -19,7 +18,6 @@ namespace Augmenta
 
             objectsContainer = new GameObject("Objects");
             objectsContainer.transform.parent = transform;
-
         }
 
         public override void Update()

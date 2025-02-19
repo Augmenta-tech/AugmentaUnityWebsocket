@@ -5,7 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 using UnityEngine.Events;
 
-namespace Augmenta
+namespace AugmentaWebsocketClient
 {
     public class AugmentaZone : AugmentaContainer
     {

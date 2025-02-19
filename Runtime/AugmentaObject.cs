@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Augmenta
+namespace AugmentaWebsocketClient
 {
     public class AugmentaUnityObject : Augmenta.GenericObject<Vector3> //this is Vector3 from UnityEngine, not System.Numerics (this is why we need to create a new class)
     {

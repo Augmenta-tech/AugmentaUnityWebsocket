@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace Augmenta
+namespace AugmentaWebsocketClient
 {
     public class AugmentaContainer : MonoBehaviour
     {
