@@ -64,8 +64,8 @@ namespace AugmentaWebsocketClient
             {
                 switch (nativeZone.shape.shapeType)
                 {
-                    case Shape<Vector3>.ShapeType.Box:
-                        BoxShape<Vector3> box = nativeZone.shape as BoxShape<Vector3>;
+                    case Augmenta.Shape<Vector3>.ShapeType.Box:
+                        Augmenta.BoxShape<Vector3> box = nativeZone.shape as Augmenta.BoxShape<Vector3>;
                         Gizmos.DrawWireCube(box.size / 2, box.size);
 
                         Gizmos.color = col + brighter;
@@ -104,20 +104,20 @@ namespace AugmentaWebsocketClient
                         }
                         break;
 
-                    case Shape<Vector3>.ShapeType.Sphere:
-                        SphereShape<Vector3> sphere = nativeZone.shape as SphereShape<Vector3>;
+                    case Augmenta.Shape<Vector3>.ShapeType.Sphere:
+                        Augmenta.SphereShape<Vector3> sphere = nativeZone.shape as Augmenta.SphereShape<Vector3>;
                         Gizmos.DrawWireSphere(Vector3.zero, sphere.radius);
                         break;
-                    case Shape<Vector3>.ShapeType.Cylinder:
-                        CylinderShape<Vector3> cylinder = nativeZone.shape as CylinderShape<Vector3>;
+                    case Augmenta.Shape<Vector3>.ShapeType.Cylinder:
+                        Augmenta.CylinderShape<Vector3> cylinder = nativeZone.shape as Augmenta.CylinderShape<Vector3>;
                         Vector3 halfSize = new Vector3(cylinder.radius, cylinder.height / 2, cylinder.radius);
                         Gizmos.DrawWireCube(halfSize, halfSize * 2);
                         break;
-                    case Shape<Vector3>.ShapeType.Cone:
-                        ConeShape<Vector3> cone = nativeZone.shape as ConeShape<Vector3>;
+                    case Augmenta.Shape<Vector3>.ShapeType.Cone:
+                        Augmenta.ConeShape<Vector3> cone = nativeZone.shape as Augmenta.ConeShape<Vector3>;
                         Gizmos.DrawWireSphere(Vector3.zero, cone.radius);
                         break;
-                    case Shape<Vector3>.ShapeType.Mesh:
+                    case Augmenta.Shape<Vector3>.ShapeType.Mesh:
                         break;
                 }
             }

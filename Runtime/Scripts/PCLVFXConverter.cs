@@ -6,7 +6,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.VFX;
 
-namespace Augmenta
+namespace AugmentaWebsocketClient
 {
 
     public class PCLVFXConverter : MonoBehaviour

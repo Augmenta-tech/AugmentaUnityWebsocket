@@ -25,15 +25,15 @@ namespace AugmentaWebsocketClient
                 switch (c.containerType)
                 {
 
-                    case ContainerType.Zone:
+                    case Augmenta.ContainerType.Zone:
                         oPrefab = client.zonePrefab;
                         break;
 
-                    case ContainerType.Scene:
+                    case Augmenta.ContainerType.Scene:
                         oPrefab = client.scenePrefab;
                         break;
 
-                    case ContainerType.Container:
+                    case Augmenta.ContainerType.Container:
                     default:
                         oPrefab = null;
                         break;

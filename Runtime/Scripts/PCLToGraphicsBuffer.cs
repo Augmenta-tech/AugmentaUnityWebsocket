@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-namespace Augmenta
+namespace AugmentaWebsocketClient
 {
 	public class PCLToGraphicsBuffer : MonoBehaviour
 	{
