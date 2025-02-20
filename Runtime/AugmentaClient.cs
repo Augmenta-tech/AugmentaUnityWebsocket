@@ -8,6 +8,67 @@ using ZstdNet;
 
 namespace AugmentaWebsocketClient
 {
+    // Inherit from Options classes to mark them as Serializable
+    // TODO: Copy and equality methods could be part of the SDK
+    [Serializable]
+    public class AxisTransformUnity : Augmenta.AxisTransform { }
+
+    [Serializable]
+    public class ProtocolOptionsUnity : Augmenta.ProtocolOptions
+    {
+        new public AxisTransformUnity axisTransform;
+
+        public bool Equals(ProtocolOptionsUnity other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (System.Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return version == other.version &&
+                   tags.Equals(other.tags) &&
+                   downSample == other.downSample &&
+                   streamClouds == other.streamClouds &&
+                   streamClusters == other.streamClusters &&
+                   streamClusterPoints == other.streamClusterPoints &&
+                   streamZonePoints == other.streamZonePoints &&
+                   boxRotationMode == other.boxRotationMode &&
+                   axisTransform.Equals(other.axisTransform) &&
+                   useCompression == other.useCompression &&
+                   usePolling == other.usePolling;
+        }
+
+        public ProtocolOptionsUnity DeepCopy()
+        {
+            ProtocolOptionsUnity other = new ProtocolOptionsUnity();
+            other.version = version;
+            other.downSample = downSample;
+            other.streamClouds = streamClouds;
+            other.streamClusters = streamClusters;
+            other.streamClusterPoints = streamClusterPoints;
+            other.streamZonePoints = streamZonePoints;
+            other.boxRotationMode = boxRotationMode;
+            other.axisTransform = axisTransform;
+            other.useCompression = useCompression;
+            other.usePolling = usePolling;
+            other.tags = new List<string>(tags);
+            other.axisTransform.axis = axisTransform.axis;
+            other.axisTransform.origin = axisTransform.origin;
+            other.axisTransform.flipX = axisTransform.flipX;
+            other.axisTransform.flipY = axisTransform.flipY;
+            other.axisTransform.flipZ = axisTransform.flipZ;
+            other.axisTransform.coordinateSpace = axisTransform.coordinateSpace;
+            // TODO: originOffset, customMatrix
+
+            return other;
+        }
+    }
+
     public class AugmentaClient : MonoBehaviour
     {
         public string ipAddress
@@ -45,7 +106,8 @@ namespace AugmentaWebsocketClient
         float lastConnectTime;
         float lastMessageTime;
 
-        public enum ProtocolVersion { Latest = 0, V2 = 2 };
+        public ProtocolOptionsUnity protocolOptions = new ProtocolOptionsUnity();
+        private ProtocolOptionsUnity currentProtocolOptions;
 
         [Header("Spawn")]
         public GameObject scenePrefab;
@@ -59,47 +121,20 @@ namespace AugmentaWebsocketClient
         [SerializeField] int _port = 6060;
         public bool connected = false;
         public bool receivingData = false;
-
-        [Header("Streaming Options")]
-        public ProtocolVersion version = ProtocolVersion.Latest;
-        public int downSample = 1;
-        public bool streamClouds = true;
-        public bool streamClusters = true;
-        public bool streamClusterPoints = true;
-        public bool streamZonePoints = false;
-        public bool useCompression = false;
-        public bool usePolling = false;
-        public List<string> tags;
-
-        int _lastDownSample = 1;
-        bool _lastStreamClouds = true;
-        bool _lastStreamClusters = true;
-        bool _lastStreamClusterPoints = true;
-        bool _lastStreamZonePoints = false;
-        bool _lastUseCompression = false;
-        bool _lastUsePolling = false;
-        List<string> _lastTags;
-
         bool hasReceivedSincePolling = false;
-
 
         [Header("Events")]
         public UnityEvent<AugmentaObject> OnObjectCreated;
         public UnityEvent<AugmentaObject> OnObjectRemoved;
 
-
         bool isProcessing;
         List<MessageEventArgs> wsMessages;
-
 
         private void Awake()
         {
             wsMessages = new List<MessageEventArgs>();
             augmentaClient = new AugmentaUnityClient(this);
-            _lastTags = new List<string>();
-
         }
-
 
         void OnDisable()
         {
@@ -150,29 +185,14 @@ namespace AugmentaWebsocketClient
                 while (isProcessing) { }
 
                 wsMessages.Add(e);
-
             };
         }
 
-
         public void SendRegister()
         {
-            Augmenta.ProtocolOptions options = new Augmenta.ProtocolOptions();
-            options.downSample = downSample;
-            options.streamClouds = streamClouds;
-            options.streamClusters = streamClusters;
-            options.streamClusterPoints = streamClusterPoints;
-            // ?
-            options.streamZonePoints = streamZonePoints;
-            options.useCompression = useCompression;
-            options.usePolling = usePolling;
-            options.boxRotationMode = Augmenta.ProtocolOptions.RotationMode.Degrees;
-            options.tags = tags;
-            options.axisTransform.axis = Augmenta.AxisTransform.AxisMode.YUpLeftHanded;
-            options.axisTransform.origin = Augmenta.AxisTransform.OriginMode.BottomLeft;
-
-            var message = augmentaClient.GetRegisterMessage(clientName, options);
+            var message = augmentaClient.GetRegisterMessage(clientName, protocolOptions);
             websocketClient.Send(message);
+            currentProtocolOptions = protocolOptions.DeepCopy();
         }
 
         void ProcessMessage(MessageEventArgs e)
@@ -181,35 +201,32 @@ namespace AugmentaWebsocketClient
             try
             {
 #endif
-            if (e.IsText)
-            {
-                augmentaClient.ProcessMessage(e.Data);
-            }
-            else if (e.IsBinary)
-            {
-                try
+                if (e.IsText)
                 {
-                    augmentaClient.ProcessData(Time.time, e.RawData, 0, useCompression);
+                    augmentaClient.ProcessMessage(e.Data);
                 }
-                catch(Exception ex)
+                else if (e.IsBinary)
                 {
-                    Debug.LogWarning("Error in processing " + ex.Message);
+                    try
+                    {
+                        augmentaClient.ProcessData(Time.time, e.RawData, 0, currentProtocolOptions.useCompression);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning("Error in processing " + ex.Message);
+                    }
+
+                    hasReceivedSincePolling = true;
+
                 }
-
-                hasReceivedSincePolling = true;
-
-            }
 #if !UNITY_EDITOR
             }
             catch (Exception err)
             {
                 Debug.LogError("Error processing message : " + err);
             }
-
 #endif
         }
-
-
 
         void Connect()
         {
@@ -237,51 +254,18 @@ namespace AugmentaWebsocketClient
         {
             if (websocketClient == null) Init();
 
-
             if (connected)
             {
-                bool tagsChanged = false;
-                if (tags.Count != _lastTags.Count) tagsChanged = true;
-                else
+                if (!protocolOptions.Equals(currentProtocolOptions))
                 {
-                    for (int i = 0; i < tags.Count; i++)
-                    {
-                        if (tags[i] != _lastTags[i])
-                        {
-                            tagsChanged = true;
-                            break;
-                        }
-                    }
-                }
-
-
-                if (streamClouds != _lastStreamClouds 
-                    || streamClusters != _lastStreamClusters 
-                    || streamClusterPoints != _lastStreamClusterPoints
-                    || streamZonePoints != _lastStreamZonePoints 
-                    || downSample != _lastDownSample
-                    || useCompression != _lastUseCompression
-                    || usePolling != _lastUsePolling
-                    || tagsChanged)
-                {
-
                     SendRegister();
-
-                    _lastStreamClouds = streamClouds;
-                    _lastStreamClusters = streamClusters;
-                    _lastStreamClusterPoints = streamClusterPoints;
-                    _lastStreamZonePoints = streamZonePoints;
-                    _lastDownSample = downSample;
-                    _lastUseCompression = useCompression;
-                    _lastUsePolling = usePolling;
-
-                    _lastTags = new List<string>(tags);
                 }
 
-
-                if (connected && usePolling && hasReceivedSincePolling) SendPoll(); //we can do it here since update will be shared with the engine runtime, so it will be called once per frame
+                if (currentProtocolOptions.usePolling && hasReceivedSincePolling)
+                {
+                    SendPoll(); //we can do it here since update will be shared with the engine runtime, so it will be called once per frame
+                }
             }
-
 
 #if !UNITY_WEBGL || UNITY_EDITOR
             if ((!connected || !websocketClient.IsAlive) && Time.time - lastConnectTime > 1)
@@ -296,7 +280,6 @@ namespace AugmentaWebsocketClient
             wsMessages.Clear();
             isProcessing = false;
 
-
             augmentaClient.Update(Time.time);
             receivingData = (Time.time - lastMessageTime) < 1;
         }
@@ -306,7 +289,6 @@ namespace AugmentaWebsocketClient
         {
             websocketClient.Close();
         }
-
     }
 
     internal class AugmentaUnityClient : Augmenta.Client<AugmentaUnityObject, Vector3>
@@ -325,9 +307,13 @@ namespace AugmentaWebsocketClient
         {
             AugmentaObject ao = GameObject.Instantiate(client.objectPrefab).GetComponent<AugmentaObject>();
             if (workingScene != null)
+            {
                 ao.transform.parent = (workingScene.wrapperObject as AugmentaScene).objectsContainer.transform;
+            }
             else
+            {
                 ao.transform.parent = client.transform;
+            }
 
             return new AugmentaUnityObject(ao);
         }
