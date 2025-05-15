@@ -8,6 +8,9 @@ namespace Augmenta
 		public AugmentaObject pObject;
 		public VisualEffect[] vfxToBind;
 
+		public string vfxPositionProperty = "Positions";
+        public string vfxCountProperty = "PositionsCount";
+
 		[Tooltip("Unlimited if <= 0")] public int capacity = 0;
 
 
@@ -25,17 +28,17 @@ namespace Augmenta
 
 			foreach (var vfx in vfxToBind)
 			{
-				if (!vfx.HasGraphicsBuffer("Positions"))
+				if (!vfx.HasGraphicsBuffer(vfxPositionProperty))
 				{
 					Debug.LogWarning("VFX Graph " + vfx.name + " should have a GraphicsBuffer property named Positions.");
 				}
 
-				if (!vfx.HasInt("PositionsCount"))
+				if (!vfx.HasInt(vfxCountProperty))
 				{
 					Debug.LogWarning("VFX Graph " + vfx.name + " should have an int property named PositionsCount.");
 				}
 
-				vfx.SetInt("PositionsCount", 0);
+				vfx.SetInt(vfxCountProperty, 0);
 			}
 
 			if (capacity > 0)
@@ -109,7 +112,7 @@ namespace Augmenta
 			pointsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, bufferSize, 3 * sizeof(float));
 			foreach (var vfx in vfxToBind)
 			{
-				vfx.SetGraphicsBuffer("Positions", pointsBuffer);
+				vfx.SetGraphicsBuffer(vfxPositionProperty, pointsBuffer);
 			}
 		}
 
@@ -117,7 +120,7 @@ namespace Augmenta
 		{
 			foreach (var vfx in vfxToBind)
 			{
-				vfx.SetInt("PositionsCount", bufferCount);
+				vfx.SetInt(vfxCountProperty, bufferCount);
 			}
 		}
 
