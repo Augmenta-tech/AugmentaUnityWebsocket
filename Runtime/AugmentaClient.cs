@@ -162,7 +162,7 @@ namespace Augmenta
             o.AddField("id", clientID);
             o.AddField("name", clientName);
             JSONObject options = JSONObject.Create();
-            if(version != ProtocolVersion.Latest) options.AddField("version", (int)version);
+            if (version != ProtocolVersion.Latest) options.AddField("version", (int)version);
             options.AddField("downSample", downSample);
             options.AddField("streamClouds", streamClouds);
             options.AddField("streamClusters", streamClusters);
@@ -192,25 +192,25 @@ namespace Augmenta
             try
             {
 #endif
-            if (e.IsText)
-            {
-                pClient.processMessage(e.Data);
-            }
-            else if (e.IsBinary)
-            {
-                try
+                if (e.IsText)
                 {
-                    pClient.processData(Time.time, e.RawData, 0, useCompression);
+                    pClient.processMessage(e.Data);
+                }
+                else if (e.IsBinary)
+                {
+                    try
+                    {
+                        pClient.processData(Time.time, e.RawData, 0, useCompression);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning("Error in processing " + ex.Message);
+                    }
+
+                    hasReceivedSincePolling = true;
 
                 }
-                catch(Exception ex)
-                {
-                    Debug.LogWarning("Error in processing " + ex.Message);
-                }
-
-                hasReceivedSincePolling = true;
-
-            }
 #if !UNITY_EDITOR
             }
             catch (Exception err)
@@ -269,10 +269,10 @@ namespace Augmenta
                 }
 
 
-                if (streamClouds != _lastStreamClouds 
-                    || streamClusters != _lastStreamClusters 
+                if (streamClouds != _lastStreamClouds
+                    || streamClusters != _lastStreamClusters
                     || streamClusterPoints != _lastStreamClusterPoints
-                    || streamZonePoints != _lastStreamZonePoints 
+                    || streamZonePoints != _lastStreamZonePoints
                     || downSample != _lastDownSample
                     || useCompression != _lastUseCompression
                     || usePolling != _lastUsePolling
@@ -344,7 +344,16 @@ namespace Augmenta
             else
                 ao.transform.parent = client.transform;
 
+            client.OnObjectCreated.Invoke(ao);
+
             return new AugmentaPObject(ao);
+        }
+
+        override protected void removeObject(BasePObject o)
+        {
+            AugmentaPObject ao = o as AugmentaPObject;
+            if (ao != null) client.OnObjectRemoved.Invoke(ao.aObject);
+            base.removeObject(o);
         }
 
         override protected AugmentaPContainer createContainerInternal(JSONObject o)

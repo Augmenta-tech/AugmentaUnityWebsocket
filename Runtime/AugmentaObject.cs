@@ -8,7 +8,7 @@ namespace Augmenta
 {
     public class AugmentaPObject : GenericPObject<Vector3> //this is Vector3 from UnityEngine, not System.Numerics (this is why we need to create a new class)
     {
-        AugmentaObject aObject;
+        public AugmentaObject aObject;
 
 
         public AugmentaPObject() { }
