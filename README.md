@@ -10,3 +10,10 @@ Use.
 
 This package makes use of the [Augmenta Client C# SDK](https://github.com/Augmenta-tech/AugmentaClientSDK-CS).  
 It also ships with the [ZstdNet](https://www.nuget.org/packages/ZstdNet) assemblies.
+
+# License
+
+This Unity plugin is open source under the MIT License (see LICENSE).
+However, it uses the proprietary Augmenta SDK, which is not open source.
+Use of the SDK is subject to the Augmenta SDK License.
+You may not redistribute the SDK itself without permission from Augmenta.
