@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 2401628463183207800}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.5253243, y: -0.56957626, z: 1.2047656}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -44,22 +44,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f54af2d74691b604bb55f4b33d35ac95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scenePrefab: {fileID: 557207557075932679, guid: 0d8d366e5ddce5d43a2cc98e358f5632,
-    type: 3}
-  zonePrefab: {fileID: 557207557075932679, guid: deb64c48586925f43be714c0ec7fcd69,
-    type: 3}
-  objectPrefab: {fileID: 7658793332000198851, guid: 3d7a6e6df4de8d04aaa3c47b8c69f793,
-    type: 3}
+  protocolOptions:
+    version: 2
+    tags: []
+    downSample: 1
+    streamClouds: 0
+    streamClusters: 1
+    streamClusterPoints: 0
+    streamZonePoints: 0
+    boxRotationMode: 2
+    axisTransform:
+      axis: 3
+      origin: 0
+      flipX: 0
+      flipY: 0
+      flipZ: 0
+      coordinateSpace: 0
+    useCompression: 1
+    usePolling: 0
+  scenePrefab: {fileID: 557207557075932679, guid: 0d8d366e5ddce5d43a2cc98e358f5632, type: 3}
+  zonePrefab: {fileID: 557207557075932679, guid: deb64c48586925f43be714c0ec7fcd69, type: 3}
+  objectPrefab: {fileID: 7658793332000198851, guid: 3d7a6e6df4de8d04aaa3c47b8c69f793, type: 3}
   clientName: Unity
   clientID: 
   _ipAddress: 127.0.0.1
   _port: 6060
   connected: 0
   receivingData: 0
-  downSample: 1
-  streamClouds: 1
-  streamClusters: 1
-  tags: []
   OnObjectCreated:
     m_PersistentCalls:
       m_Calls: []
