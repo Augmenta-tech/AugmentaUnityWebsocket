@@ -4,7 +4,6 @@ using UnityEngine;
 using System;
 using UnityEngine.Events;
 using WebSocketSharp;
-using ZstdNet;
 using Augmenta;
 using static Augmenta.ProtocolOptions;
 using static Augmenta.AxisTransform;
