@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine.Events;
+using System.ComponentModel;
 
 namespace AugmentaWebsocketClient
 {
@@ -11,7 +12,7 @@ namespace AugmentaWebsocketClient
     {
         Augmenta.Zone<Vector3> nativeZone;
 
-        public int presence { get { return nativeZone.presence; } }
+        public int presence { get { return nativeZone.presence; } set { nativeZone.presence = value; } }
         public float density { get { return nativeZone.density; } }
         public float sliderValue { get { return nativeZone.sliderValue; } }
         public Vector2 padXY { get { return new Vector2(nativeZone.padX, nativeZone.padY); } }
@@ -25,20 +26,20 @@ namespace AugmentaWebsocketClient
             base.Setup(c, client);
             this.nativeZone = c as Augmenta.Zone<Vector3>;
             this.nativeZone.wrapperObject = this;
-            this.nativeZone.enterEvent += OnObjectsEntered;
-            this.nativeZone.exitEvent += OnObjectsExited;
-        }
 
-        private void OnObjectsEntered(int count)
-        {
-            Debug.Log("Objects entered: " + count);
-            objectsEnteredEvent.Invoke(count);
-        }
+            EventHandler<Augmenta.ObjectsEnteredZoneArgs> onObjectsEntered = (sender, eventArgs) =>
+            {
+                Debug.Log("Objects entered: " + eventArgs.NumObjects);
+                objectsEnteredEvent.Invoke(eventArgs.NumObjects);
+            };
+            this.nativeZone.ObjectsEntered += onObjectsEntered;
 
-        private void OnObjectsExited(int count)
-        {
-            Debug.Log("Objects exited: " + count);
-            objectsExitedEvent.Invoke(count);
+            EventHandler<Augmenta.ObjectsExitedZoneArgs> onObjectsExited = (sender, eventArgs) =>
+            {
+                Debug.Log("Objects exited: " + eventArgs.NumObjects);
+                objectsExitedEvent.Invoke(eventArgs.NumObjects);
+            };
+            this.nativeZone.ObjectsExited += onObjectsExited;
         }
 
         private void OnDrawGizmos()
@@ -53,13 +54,15 @@ namespace AugmentaWebsocketClient
             Gizmos.color = col;
 
             //transform for local space
-            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
-
             if (points.Length > 0)
             {
-                foreach (var p in points) Gizmos.DrawLine(p, p + Vector3.forward * .01f);
+                foreach (var p in points)
+                {
+                    Gizmos.DrawLine(p, p + Vector3.forward * .01f);
+                }
             }
 
+            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
             if (nativeZone.shape != null)
             {
                 switch (nativeZone.shape.shapeType)

@@ -5,68 +5,40 @@ using System;
 using UnityEngine.Events;
 using WebSocketSharp;
 using ZstdNet;
+using Augmenta;
+using static Augmenta.ProtocolOptions;
+using static Augmenta.AxisTransform;
+using Unity.VisualScripting.YamlDotNet.Core;
 
 namespace AugmentaWebsocketClient
 {
-    // Inherit from Options classes to mark them as Serializable
-    // TODO: Copy and equality methods could be part of the SDK
+    // Duplicate protocol options classes to make them serializable
+    // If you know of a better way to do this, please ping us :-)
     [Serializable]
-    public class AxisTransformUnity : Augmenta.AxisTransform { }
-
-    [Serializable]
-    public class ProtocolOptionsUnity : Augmenta.ProtocolOptions
+    public class SerializableAxisTransform
     {
-        new public AxisTransformUnity axisTransform;
+        public Augmenta.AxisTransform.AxisMode axis = Augmenta.AxisTransform.AxisMode.ZUpRightHanded;
+        public Augmenta.AxisTransform.OriginMode origin = Augmenta.AxisTransform.OriginMode.BottomLeft;
+        public bool flipX = false;
+        public bool flipY = false;
+        public bool flipZ = false;
+        public Augmenta.AxisTransform.CoordinateSpace coordinateSpace = Augmenta.AxisTransform.CoordinateSpace.Absolute;
+    }
 
-        public bool Equals(ProtocolOptionsUnity other)
-        {
-            if (other is null)
-            {
-                return false;
-            }
-
-            if (System.Object.ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return version == other.version &&
-                   tags.Equals(other.tags) &&
-                   downSample == other.downSample &&
-                   streamClouds == other.streamClouds &&
-                   streamClusters == other.streamClusters &&
-                   streamClusterPoints == other.streamClusterPoints &&
-                   streamZonePoints == other.streamZonePoints &&
-                   boxRotationMode == other.boxRotationMode &&
-                   axisTransform.Equals(other.axisTransform) &&
-                   useCompression == other.useCompression &&
-                   usePolling == other.usePolling;
-        }
-
-        public ProtocolOptionsUnity DeepCopy()
-        {
-            ProtocolOptionsUnity other = new ProtocolOptionsUnity();
-            other.version = version;
-            other.downSample = downSample;
-            other.streamClouds = streamClouds;
-            other.streamClusters = streamClusters;
-            other.streamClusterPoints = streamClusterPoints;
-            other.streamZonePoints = streamZonePoints;
-            other.boxRotationMode = boxRotationMode;
-            other.axisTransform = axisTransform;
-            other.useCompression = useCompression;
-            other.usePolling = usePolling;
-            other.tags = new List<string>(tags);
-            other.axisTransform.axis = axisTransform.axis;
-            other.axisTransform.origin = axisTransform.origin;
-            other.axisTransform.flipX = axisTransform.flipX;
-            other.axisTransform.flipY = axisTransform.flipY;
-            other.axisTransform.flipZ = axisTransform.flipZ;
-            other.axisTransform.coordinateSpace = axisTransform.coordinateSpace;
-            // TODO: originOffset, customMatrix
-
-            return other;
-        }
+    [Serializable]
+    public class SerializableProtocolOptions
+    {
+        public ProtocolVersion version = ProtocolVersion.Latest;
+        public List<string> tags = new();
+        public int downSample = 1;
+        public bool streamClouds = true;
+        public bool streamClusters = true;
+        public bool streamClusterPoints = true;
+        public bool streamZonePoints = false;
+        public RotationMode boxRotationMode = RotationMode.Quaternions;
+        public SerializableAxisTransform axisTransform = new();
+        public bool useCompression = true;
+        public bool usePolling = false;
     }
 
     public class AugmentaClient : MonoBehaviour
@@ -106,8 +78,7 @@ namespace AugmentaWebsocketClient
         float lastConnectTime;
         float lastMessageTime;
 
-        public ProtocolOptionsUnity protocolOptions = new ProtocolOptionsUnity();
-        private ProtocolOptionsUnity currentProtocolOptions;
+        public SerializableProtocolOptions protocolOptions = new SerializableProtocolOptions();
 
         [Header("Spawn")]
         public GameObject scenePrefab;
@@ -163,6 +134,7 @@ namespace AugmentaWebsocketClient
             {
                 connected = true;
                 Debug.Log("Connection " + "ws://" + ipAddress + ":" + port + " opened !");
+                augmentaClient.options = GetProtocolOptions();
                 SendRegister();
             };
 
@@ -190,9 +162,9 @@ namespace AugmentaWebsocketClient
 
         public void SendRegister()
         {
-            var message = augmentaClient.GetRegisterMessage(clientName, protocolOptions);
+            var message = augmentaClient.GetRegisterMessage(clientName);
+            Debug.Log(message);
             websocketClient.Send(message);
-            currentProtocolOptions = protocolOptions.DeepCopy();
         }
 
         void ProcessMessage(MessageEventArgs e)
@@ -201,24 +173,25 @@ namespace AugmentaWebsocketClient
             try
             {
 #endif
-                if (e.IsText)
+            if (e.IsText)
+            {
+                Debug.Log(e.Data);
+                augmentaClient.ProcessMessage(e.Data);
+            }
+            else if (e.IsBinary)
+            {
+                try
                 {
-                    augmentaClient.ProcessMessage(e.Data);
+                    augmentaClient.ProcessData(Time.time, e.RawData);
                 }
-                else if (e.IsBinary)
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        augmentaClient.ProcessData(Time.time, e.RawData, 0, currentProtocolOptions.useCompression);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogWarning("Error in processing " + ex.Message);
-                    }
-
-                    hasReceivedSincePolling = true;
-
+                    Debug.LogWarning("Error in processing " + ex.Message);
                 }
+
+                hasReceivedSincePolling = true;
+
+            }
 #if !UNITY_EDITOR
             }
             catch (Exception err)
@@ -256,12 +229,14 @@ namespace AugmentaWebsocketClient
 
             if (connected)
             {
-                if (!protocolOptions.Equals(currentProtocolOptions))
+                var options = GetProtocolOptions();
+                if (!options.Equals(augmentaClient.options))
                 {
+                    augmentaClient.options = options;
                     SendRegister();
                 }
 
-                if (currentProtocolOptions.usePolling && hasReceivedSincePolling)
+                if (augmentaClient.options.usePolling && hasReceivedSincePolling)
                 {
                     SendPoll(); //we can do it here since update will be shared with the engine runtime, so it will be called once per frame
                 }
@@ -288,6 +263,28 @@ namespace AugmentaWebsocketClient
         private void OnApplicationQuit()
         {
             websocketClient.Close();
+        }
+
+        private Augmenta.ProtocolOptions GetProtocolOptions()
+        {
+            Augmenta.ProtocolOptions options = new();
+            options.version = protocolOptions.version;
+            options.tags = new List<string>(protocolOptions.tags);
+            options.downSample = protocolOptions.downSample;
+            options.streamClouds = protocolOptions.streamClouds;
+            options.streamClusters = protocolOptions.streamClusters;
+            options.streamClusterPoints = protocolOptions.streamClusterPoints;
+            options.streamZonePoints = protocolOptions.streamZonePoints;
+            options.boxRotationMode = protocolOptions.boxRotationMode;
+            options.useCompression = protocolOptions.useCompression;
+            options.usePolling = protocolOptions.usePolling;
+            options.axisTransform.axis = protocolOptions.axisTransform.axis;
+            options.axisTransform.origin = protocolOptions.axisTransform.origin;
+            options.axisTransform.flipX = protocolOptions.axisTransform.flipX;
+            options.axisTransform.flipY = protocolOptions.axisTransform.flipY;
+            options.axisTransform.flipZ = protocolOptions.axisTransform.flipZ;
+            options.axisTransform.coordinateSpace = protocolOptions.axisTransform.coordinateSpace;
+            return options;
         }
     }
 
