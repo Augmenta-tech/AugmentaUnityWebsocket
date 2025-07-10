@@ -1,14 +1,18 @@
 {
-  "author": "Augmenta",
-  "description": "Augmenta Unity Client.",
-  "displayName": "Augmenta Websocket Client",
+  "name": "tech.augmenta.augmentawebsocketunityclient",
+  "version": "1.0.4",
+  "author": {
+    "name": "Augmenta",
+    "url": "(http://augmenta.tech)"
+  },
+  "displayName": "Augmenta Websocket Unity Client",
+  "description": "Augmenta WebSocket Unity Client",
   "keywords": [
-    "unity"
+    "unity",
+    "augmenta",
+    "interactive"
   ],
   "license": "MIT",
-  "name": "tech.augmenta.augmentaunityclient",
   "repository": "Augmenta-tech/AugmentaUnityWebsocket",
-  "unity": "2018.3",
-  "unityRelease": "0f1",
-  "version": "1.0.4"
+  "unity": "2018.3"
 }
