@@ -1,10 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
-using System.Runtime.InteropServices;
 using UnityEngine.Events;
-using System.ComponentModel;
 
 namespace AugmentaWebsocketClient
 {

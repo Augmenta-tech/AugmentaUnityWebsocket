@@ -7,7 +7,6 @@ using WebSocketSharp;
 using Augmenta;
 using static Augmenta.ProtocolOptions;
 using static Augmenta.AxisTransform;
-using Unity.VisualScripting.YamlDotNet.Core;
 
 namespace AugmentaWebsocketClient
 {
