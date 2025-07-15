@@ -97,11 +97,6 @@ namespace AugmentaWebsocketClient
             this.nativeObject = nativeObject;
         }
 
-        private void Awake()
-        {
-            //transform.localPosition = Vector3.zero;
-        }
-
         // Update is called once per frame
         void Update()
         {
@@ -118,12 +113,12 @@ namespace AugmentaWebsocketClient
         public void Kill(bool immediate)
         {
             onRemove?.Invoke(this);
+
             if (immediate || killDelayTime == 0)
             {
                 Destroy(gameObject);
                 return;
             }
-
 
             StartCoroutine(KillForReal(killDelayTime));
         }

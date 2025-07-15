@@ -96,13 +96,20 @@ namespace AugmentaWebsocketClient
         public UnityEvent<AugmentaObject> OnObjectCreated;
         public UnityEvent<AugmentaObject> OnObjectRemoved;
 
+        public Dictionary<AugmentaUnityObject, AugmentaObject> augmentaObjects;
+
         bool isProcessing;
         List<MessageEventArgs> wsMessages;
 
-        private void Awake()
+        private void OnEnable()
         {
             wsMessages = new List<MessageEventArgs>();
             augmentaClient = new AugmentaUnityClient(this);
+
+            augmentaObjects = new Dictionary<AugmentaUnityObject, AugmentaObject>();
+
+            Init();
+            Connect();
         }
 
         void OnDisable()
@@ -111,19 +118,10 @@ namespace AugmentaWebsocketClient
             augmentaClient.Clear();
             augmentaClient = null;
             wsMessages.Clear();
+
+            augmentaObjects.Clear();
         }
 
-        private void OnEnable()
-        {
-            wsMessages = new List<MessageEventArgs>();
-            augmentaClient = new AugmentaUnityClient(this);
-        }
-
-        void Start()
-        {
-            Init();
-            Connect();
-        }
 
         void Init()
         {
@@ -202,21 +200,16 @@ namespace AugmentaWebsocketClient
         void Connect()
         {
             Debug.Log("Connecting websocket...");
-            StartCoroutine(ConnectCoroutine());
+
+            lastConnectTime = Time.time;
+            websocketClient.Close();
+            websocketClient.Connect();
         }
 
         void SendPoll()
         {
             var message = augmentaClient.GetPollMessage();
             websocketClient.Send(message);
-        }
-
-        IEnumerator ConnectCoroutine()
-        {
-            lastConnectTime = Time.time;
-            websocketClient.Close();
-            websocketClient.Connect();
-            yield return null;
         }
 
         // Update is called once per frame
@@ -255,12 +248,6 @@ namespace AugmentaWebsocketClient
 
             augmentaClient.Update(Time.time);
             receivingData = (Time.time - lastMessageTime) < 1;
-        }
-
-
-        private void OnApplicationQuit()
-        {
-            websocketClient.Close();
         }
 
         private Augmenta.ProtocolOptions GetProtocolOptions()
@@ -310,8 +297,26 @@ namespace AugmentaWebsocketClient
                 ao.transform.parent = client.transform;
             }
 
-            return new AugmentaUnityObject(ao);
+            AugmentaUnityObject augmentaUnityObject = new AugmentaUnityObject(ao);
+
+            client.augmentaObjects.Add(augmentaUnityObject, ao);
+            client.OnObjectCreated.Invoke(ao);
+
+            return augmentaUnityObject;
         }
+
+        //override protected void RemoveObject(BaseObject o)
+        //{
+        //    AugmentaUnityObject augmentaUnityObject = o as AugmentaUnityObject;
+
+        //    if (client.augmentaObjects.ContainsKey(augmentaUnityObject))
+        //    {
+        //        client.OnObjectRemoved.Invoke(client.augmentaObjects[augmentaUnityObject]);
+        //        client.augmentaObjects.Remove(augmentaUnityObject);
+        //    }
+
+        //    base.RemoveObject(o);
+        //}
 
         override protected void OnContainerCreated(ref Augmenta.Container<Vector3> newContainer)
         {
