@@ -93,8 +93,8 @@ namespace AugmentaWebsocketClient
         bool hasReceivedSincePolling = false;
 
         [Header("Events")]
-        public UnityEvent<AugmentaObject> OnObjectCreated;
-        public UnityEvent<AugmentaObject> OnObjectRemoved;
+        public UnityEvent<AugmentaObject> onObjectCreated;
+        public UnityEvent<AugmentaObject> onObjectRemoved;
 
         bool isProcessing;
         List<MessageEventArgs> wsMessages;
@@ -104,12 +104,19 @@ namespace AugmentaWebsocketClient
             wsMessages = new List<MessageEventArgs>();
             augmentaClient = new AugmentaUnityClient(this);
 
+            augmentaClient.onObjectCreated += OnObjectCreatedClient;
+            augmentaClient.onObjectRemoved += OnObjectRemovedClient;
+
             Init();
             Connect();
         }
 
         void OnDisable()
         {
+            //Probably not necessary if we destroy the client after this
+            augmentaClient.onObjectCreated -= OnObjectCreatedClient;
+            augmentaClient.onObjectRemoved -= OnObjectRemovedClient;
+
             websocketClient.Close();
             augmentaClient.Clear();
             augmentaClient = null;
@@ -206,6 +213,16 @@ namespace AugmentaWebsocketClient
             websocketClient.Send(message);
         }
 
+        void OnObjectCreatedClient(BaseObject obj)
+        {
+            onObjectCreated?.Invoke((obj as AugmentaUnityObject).GetAugmentaObject());
+        }
+
+        void OnObjectRemovedClient(BaseObject obj)
+        {
+            onObjectRemoved?.Invoke((obj as AugmentaUnityObject).GetAugmentaObject());
+        }
+
         // Update is called once per frame
         /*async*/
         void Update()
@@ -291,20 +308,7 @@ namespace AugmentaWebsocketClient
                 ao.transform.parent = client.transform;
             }
 
-            AugmentaUnityObject augmentaUnityObject = new AugmentaUnityObject(ao);
-
-            client.OnObjectCreated.Invoke(ao);
-
-            return augmentaUnityObject;
-        }
-
-        override protected void RemoveObject(BaseObject o)
-        {
-            AugmentaUnityObject augmentaUnityObject = o as AugmentaUnityObject;
-
-            client.OnObjectRemoved.Invoke(augmentaUnityObject.GetAugmentaObject());
-
-            base.RemoveObject(o);
+            return new AugmentaUnityObject(ao);
         }
 
         override protected void OnContainerCreated(ref Augmenta.Container<Vector3> newContainer)
