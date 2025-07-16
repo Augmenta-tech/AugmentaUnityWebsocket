@@ -1,0 +1,3 @@
+[submodule "Runtime/Plugins/AugmentaClientSDK"]
+	path = Runtime/Plugins/AugmentaClientSDK
+	url = https://github.com/Augmenta-tech/AugmentaClientSDK-CS
