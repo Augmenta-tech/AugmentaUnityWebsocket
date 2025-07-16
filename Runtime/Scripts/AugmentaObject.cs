@@ -20,6 +20,11 @@ namespace AugmentaWebsocketClient
             aObject.SetNativeObject(this);
         }
 
+        public AugmentaObject GetAugmentaObject()
+        {
+            return aObject;
+        }
+
         override protected void UpdateTransform()
         {
             if (!isCluster)

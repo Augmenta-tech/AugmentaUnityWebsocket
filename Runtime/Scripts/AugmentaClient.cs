@@ -96,8 +96,6 @@ namespace AugmentaWebsocketClient
         public UnityEvent<AugmentaObject> OnObjectCreated;
         public UnityEvent<AugmentaObject> OnObjectRemoved;
 
-        public Dictionary<AugmentaUnityObject, AugmentaObject> augmentaObjects;
-
         bool isProcessing;
         List<MessageEventArgs> wsMessages;
 
@@ -105,8 +103,6 @@ namespace AugmentaWebsocketClient
         {
             wsMessages = new List<MessageEventArgs>();
             augmentaClient = new AugmentaUnityClient(this);
-
-            augmentaObjects = new Dictionary<AugmentaUnityObject, AugmentaObject>();
 
             Init();
             Connect();
@@ -118,8 +114,6 @@ namespace AugmentaWebsocketClient
             augmentaClient.Clear();
             augmentaClient = null;
             wsMessages.Clear();
-
-            augmentaObjects.Clear();
         }
 
 
@@ -299,24 +293,19 @@ namespace AugmentaWebsocketClient
 
             AugmentaUnityObject augmentaUnityObject = new AugmentaUnityObject(ao);
 
-            client.augmentaObjects.Add(augmentaUnityObject, ao);
             client.OnObjectCreated.Invoke(ao);
 
             return augmentaUnityObject;
         }
 
-        //override protected void RemoveObject(BaseObject o)
-        //{
-        //    AugmentaUnityObject augmentaUnityObject = o as AugmentaUnityObject;
+        override protected void RemoveObject(BaseObject o)
+        {
+            AugmentaUnityObject augmentaUnityObject = o as AugmentaUnityObject;
 
-        //    if (client.augmentaObjects.ContainsKey(augmentaUnityObject))
-        //    {
-        //        client.OnObjectRemoved.Invoke(client.augmentaObjects[augmentaUnityObject]);
-        //        client.augmentaObjects.Remove(augmentaUnityObject);
-        //    }
+            client.OnObjectRemoved.Invoke(augmentaUnityObject.GetAugmentaObject());
 
-        //    base.RemoveObject(o);
-        //}
+            base.RemoveObject(o);
+        }
 
         override protected void OnContainerCreated(ref Augmenta.Container<Vector3> newContainer)
         {
