@@ -94,6 +94,7 @@ namespace AugmentaWebsocketClient
 
         [Header("Events")]
         public UnityEvent<AugmentaObject> onObjectCreated;
+        public UnityEvent<AugmentaObject> onObjectUpdated;
         public UnityEvent<AugmentaObject> onObjectRemoved;
 
         bool isProcessing;
@@ -105,6 +106,7 @@ namespace AugmentaWebsocketClient
             augmentaClient = new AugmentaUnityClient(this);
 
             augmentaClient.onObjectCreated += OnObjectCreatedClient;
+            augmentaClient.onObjectUpdated += OnObjectUpdatedClient;
             augmentaClient.onObjectRemoved += OnObjectRemovedClient;
 
             Init();
@@ -115,6 +117,7 @@ namespace AugmentaWebsocketClient
         {
             //Probably not necessary if we destroy the client after this
             augmentaClient.onObjectCreated -= OnObjectCreatedClient;
+            augmentaClient.onObjectUpdated -= OnObjectUpdatedClient;
             augmentaClient.onObjectRemoved -= OnObjectRemovedClient;
 
             websocketClient.Close();
@@ -216,6 +219,11 @@ namespace AugmentaWebsocketClient
         void OnObjectCreatedClient(BaseObject obj)
         {
             onObjectCreated?.Invoke((obj as AugmentaUnityObject).GetAugmentaObject());
+        }
+
+        void OnObjectUpdatedClient(BaseObject obj)
+        {
+            onObjectUpdated?.Invoke((obj as AugmentaUnityObject).GetAugmentaObject());
         }
 
         void OnObjectRemovedClient(BaseObject obj)
